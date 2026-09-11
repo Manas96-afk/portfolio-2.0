@@ -1,5 +1,4 @@
 import MagneticText from './MagneticText'
-import Logo from './Logo'
 
 const SOCIAL_LINKS = [
   { name: 'GitHub', url: 'https://github.com/Manas96-afk?tab=repositories' },
@@ -14,9 +13,6 @@ export default function Footer() {
   return (
     <footer id="footer" className="minimal-footer">
       <div className="container footer-content-wrap">
-        <div className="footer-brand-mark">
-          <Logo size="large" showText={false} />
-        </div>
         <h2 className="footer-title">MANAS BANDHU</h2>
 
         <p className="footer-quote">

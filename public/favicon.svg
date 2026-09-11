@@ -1,97 +1,64 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
   <defs>
-    <!-- Atmosphere & Space Glow -->
-    <radialGradient id="spaceGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="60%" stop-color="#001827" stop-opacity="1" />
-      <stop offset="90%" stop-color="#003554" stop-opacity="0.8" />
-      <stop offset="100%" stop-color="#00a8ff" stop-opacity="0" />
+    <!-- Background Gradient for Tab Visibility (works in dark and light browser tabs) -->
+    <radialGradient id="tabBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#141824" />
+      <stop offset="85%" stop-color="#060910" />
+      <stop offset="100%" stop-color="#020408" />
     </radialGradient>
 
-    <!-- Ocean Gradient -->
-    <radialGradient id="oceanGrad" cx="35%" cy="30%" r="70%">
-      <stop offset="0%" stop-color="#006699" />
-      <stop offset="45%" stop-color="#003f66" />
-      <stop offset="85%" stop-color="#001d33" />
-      <stop offset="100%" stop-color="#000e1a" />
-    </radialGradient>
-
-    <!-- Continental Landmass Gradient -->
-    <linearGradient id="landGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00e5a3" />
-      <stop offset="50%" stop-color="#00b480" />
-      <stop offset="100%" stop-color="#007a56" />
+    <!-- Fiery Solar to Gold Gradient -->
+    <linearGradient id="logoFlame" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff3b00" />
+      <stop offset="45%" stop-color="#ff8800" />
+      <stop offset="100%" stop-color="#d4af37" />
     </linearGradient>
 
-    <!-- Atmosphere Rim Highlight -->
-    <radialGradient id="rimGlow" cx="30%" cy="25%" r="75%">
-      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9" />
-      <stop offset="40%" stop-color="#0284c7" stop-opacity="0.4" />
-      <stop offset="80%" stop-color="#0369a1" stop-opacity="0" />
-    </radialGradient>
-
-    <!-- Orbit Ring Gradient -->
-    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff3b00" stop-opacity="0.9" />
-      <stop offset="50%" stop-color="#ffaa00" stop-opacity="0.7" />
-      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.3" />
+    <!-- Secondary Accent Gradient -->
+    <linearGradient id="logoAmber" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="40%" stop-color="#ffaa00" />
+      <stop offset="100%" stop-color="#ff3b00" />
     </linearGradient>
 
-    <!-- Glow Filter for Atmosphere -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="1.8" result="blur" />
+    <!-- High Contrast Neon Glow for Tab Icon -->
+    <filter id="logoTabGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
-
-    <!-- Globe Sphere Clip -->
-    <clipPath id="globeClip">
-      <circle cx="32" cy="32" r="23" />
-    </clipPath>
   </defs>
 
-  <!-- Outer Ambient Atmospheric Halo -->
-  <circle cx="32" cy="32" r="28" fill="url(#spaceGlow)" />
-  <circle cx="32" cy="32" r="24.5" fill="none" stroke="#38bdf8" stroke-width="1.2" stroke-opacity="0.5" filter="url(#glow)" />
+  <!-- Background Base with subtle border for crisp tab definition -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#tabBg)" stroke="rgba(255, 59, 0, 0.35)" stroke-width="1.5" />
 
-  <!-- The Globe Sphere Body -->
-  <circle cx="32" cy="32" r="23" fill="url(#oceanGrad)" />
+  <!-- Outer Cyber Hexagon Accent -->
+  <path d="M32,7 L53,19 L53,45 L32,57 L11,45 L11,19 Z" fill="rgba(255, 59, 0, 0.08)" stroke="url(#logoFlame)" stroke-width="1.2" stroke-opacity="0.5" />
 
-  <!-- Clipped Continents & Grid Lines -->
-  <g clip-path="url(#globeClip)">
-    <!-- Latitude Lines (Curved Parallels) -->
-    <ellipse cx="32" cy="32" rx="23" ry="17" fill="none" stroke="#38bdf8" stroke-width="0.7" stroke-dasharray="2 2" stroke-opacity="0.35" />
-    <ellipse cx="32" cy="32" rx="23" ry="9" fill="none" stroke="#38bdf8" stroke-width="0.7" stroke-dasharray="2 2" stroke-opacity="0.35" />
-    <line x1="9" y1="32" x2="55" y2="32" stroke="#38bdf8" stroke-width="0.8" stroke-opacity="0.45" />
+  <!-- MB Monogram (Manas Bandhu) — Bold & Thick for perfect 16px/32px browser tab clarity -->
+  <!-- 'M' Letterform Vector -->
+  <path
+    d="M17,47 L17,17 L28,32 L34,22 L34,47"
+    fill="none"
+    stroke="url(#logoFlame)"
+    stroke-width="4.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#logoTabGlow)"
+  />
 
-    <!-- Longitude Lines (Curved Meridians) -->
-    <ellipse cx="32" cy="32" rx="16" ry="23" fill="none" stroke="#38bdf8" stroke-width="0.7" stroke-dasharray="2 2" stroke-opacity="0.35" />
-    <ellipse cx="32" cy="32" rx="8" ry="23" fill="none" stroke="#38bdf8" stroke-width="0.7" stroke-dasharray="2 2" stroke-opacity="0.35" />
-    <line x1="32" y1="9" x2="32" y2="55" stroke="#38bdf8" stroke-width="0.8" stroke-opacity="0.45" />
+  <!-- 'B' Letterform Vector Interlocking from Center Spine -->
+  <path
+    d="M34,22 C42,22 47,25 47,31 C47,36 41,38 34,38 C43,38 48,41 48,46 C48,51 41,52 34,52 L27,52"
+    fill="none"
+    stroke="url(#logoAmber)"
+    stroke-width="4.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
 
-    <!-- Stylized Earth Continents (Americas, Europe/Africa, Asia/Australia) -->
-    <!-- North & Central America -->
-    <path d="M15,19 Q19,16 23,20 Q25,23 21,27 Q18,30 19,34 Q16,33 15,29 Q13,24 15,19 Z" fill="url(#landGrad)" />
-    <!-- South America -->
-    <path d="M21,34 Q26,35 25,40 Q23,47 21,49 Q19,45 20,38 Z" fill="url(#landGrad)" />
-    <!-- Europe & Africa -->
-    <path d="M30,17 Q34,15 36,19 Q33,23 37,24 Q36,29 38,34 Q35,42 32,45 Q30,37 29,31 Q31,24 29,20 Z" fill="url(#landGrad)" />
-    <!-- Asia & Far East -->
-    <path d="M38,18 Q45,16 49,21 Q51,27 46,30 Q42,28 41,23 Z" fill="url(#landGrad)" />
-    <!-- Indian Subcontinent & Australia -->
-    <path d="M43,33 Q47,32 49,36 Q48,40 44,39 Z" fill="url(#landGrad)" />
-    <circle cx="48" cy="44" r="3.2" fill="url(#landGrad)" />
-    <!-- Greenland / Arctic islands -->
-    <path d="M27,13 Q31,12 30,15 Q26,16 27,13 Z" fill="#bbf7d0" />
-
-    <!-- 3D Specular Highlight Gloss (Curved Lens Sheen) -->
-    <path d="M12,18 C16,11 26,9 35,11 C26,14 18,22 15,31 C12,26 11,22 12,18 Z" fill="#ffffff" fill-opacity="0.35" />
-    <!-- Inner Dark Shadow for realistic depth -->
-    <circle cx="32" cy="32" r="23" fill="url(#rimGlow)" style="mix-blend-mode: screen;" />
-  </g>
-
-  <!-- Glowing Equatorial / Orbital Ring with Cyber Hue -->
-  <ellipse cx="32" cy="32" rx="27" ry="9" fill="none" stroke="url(#orbitGrad)" stroke-width="1.8" transform="rotate(-22 32 32)" stroke-dasharray="32 6 8 6" />
-  
-  <!-- Orbital Satellite / Data Beacon Sparkle -->
-  <circle cx="53" cy="23" r="2.2" fill="#ff3b00" filter="url(#glow)" />
-  <circle cx="53" cy="23" r="1.2" fill="#ffffff" />
+  <!-- Cybernetic Corner Nodes -->
+  <circle cx="32" cy="7" r="2" fill="#ff3b00" />
+  <circle cx="53" cy="19" r="2" fill="#d4af37" />
+  <circle cx="11" cy="45" r="2" fill="#ff8800" />
+  <circle cx="28" cy="32" r="1.6" fill="#ffffff" />
 </svg>
