@@ -160,38 +160,71 @@ export default function ThemeToggle({ className = '' }) {
     }
   }, [])
 
-  // Gyroscope & Device Tilt / Motion listener (Phones & Tablets)
+  // 100% Comprehensive Mobile Gyroscope & Accelerometer Physics Engine
   useEffect(() => {
     let lastGamma = 0
     let lastOrientationTime = performance.now()
 
+    // Global one-time iOS 13+ permission request on any user touch/tap on window
+    const enableGyroOnGesture = () => {
+      if (
+        typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function'
+      ) {
+        DeviceOrientationEvent.requestPermission()
+          .then((state) => {
+            if (state === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation, { passive: true })
+            }
+          })
+          .catch(() => {})
+      }
+    }
+
     const handleOrientation = (e) => {
       // gamma: left-to-right roll angle in degrees [-90, +90]
+      // beta: front-to-back pitch angle in degrees [-180, +180]
       const gamma = e.gamma
-      if (gamma == null) return
+      const beta = e.beta
+      if (gamma == null && beta == null) return
 
       const now = performance.now()
       const dt = Math.max(0.008, (now - lastOrientationTime) / 1000)
       lastOrientationTime = now
 
-      // Clamped tilt angle [-55, +55]
-      const clampedGamma = Math.max(-55, Math.min(55, gamma))
+      // Screen rotation awareness (portrait vs landscape 90° / 270°)
+      const screenAngle = (window.screen?.orientation?.angle || window.orientation || 0)
+      let effectiveRoll = gamma || 0
 
-      // Realistic physical lean offset along X axis (-34px to +34px)
-      const targetTiltX = (clampedGamma / 55) * 34
+      if (screenAngle === 90) {
+        effectiveRoll = -(beta || 0)
+      } else if (screenAngle === 270 || screenAngle === -90) {
+        effectiveRoll = (beta || 0)
+      } else if (screenAngle === 180) {
+        effectiveRoll = -effectiveRoll
+      }
 
-      // Angular velocity for tilt flick / jolt reaction
-      const dGamma = clampedGamma - lastGamma
+      // Convert degrees to radians for 100% true physical gravity angle
+      // When holding phone, typical viewing angle tilt is between -55° and +55°
+      const clampedDegrees = Math.max(-65, Math.min(65, effectiveRoll))
+      const tiltRad = (clampedDegrees * Math.PI) / 180
+
+      // True physical pendulum equilibrium: X = Length * sin(tiltAngle)
+      // With L = 84px: at 30° -> 42px, at 45° -> 59.4px, at 60° -> 72px!
+      const targetTiltX = Math.sin(tiltRad) * 68
+
+      // Calculate angular jerk velocity for natural dynamic flick impulses
+      const dGamma = clampedDegrees - lastGamma
       const angularVel = dGamma / dt
       lastGamma = clampedGamma
 
       const sim = simRef.current
       sim.gyroTargetX = targetTiltX
 
-      // Rapid phone tilt / rotation imparts dynamic momentum
-      if (Math.abs(angularVel) > 40 && !sim.isDragging) {
-        sim.vx += Math.max(-14, Math.min(14, angularVel * 0.08))
-        sim.waveAmp += Math.max(-4.5, Math.min(4.5, angularVel * 0.04))
+      // If user tilts the phone rapidly or flicks it, impart natural rotational impulse
+      if (Math.abs(angularVel) > 35 && !sim.isDragging) {
+        sim.vx += Math.max(-18, Math.min(18, angularVel * 0.12))
+        sim.waveAmp += Math.max(-6, Math.min(6, angularVel * 0.06))
       }
     }
 
@@ -201,19 +234,29 @@ export default function ThemeToggle({ className = '' }) {
       const sim = simRef.current
       if (sim.isDragging) return
 
-      // Lateral phone shake / impulse (acc.x in m/s^2)
-      if (typeof acc.x === 'number' && Math.abs(acc.x) > 1.2) {
-        sim.vx -= Math.max(-12, Math.min(12, acc.x * 1.6))
-        sim.waveAmp += (Math.random() > 0.5 ? 1 : -1) * 2.2
+      // Lateral phone shake/jolt (acc.x in m/s^2)
+      if (typeof acc.x === 'number' && Math.abs(acc.x) > 1.0) {
+        sim.vx -= Math.max(-16, Math.min(16, acc.x * 2.2))
+        sim.waveAmp += (Math.random() > 0.5 ? 1 : -1) * 2.8
       }
     }
 
     window.addEventListener('deviceorientation', handleOrientation, { passive: true })
+    window.addEventListener('deviceorientationabsolute', handleOrientation, { passive: true })
     window.addEventListener('devicemotion', handleMotion, { passive: true })
+
+    // Listen on first user gesture anywhere on window to unlock iOS gyro
+    window.addEventListener('touchstart', enableGyroOnGesture, { once: true, passive: true })
+    window.addEventListener('pointerdown', enableGyroOnGesture, { once: true, passive: true })
+    window.addEventListener('click', enableGyroOnGesture, { once: true, passive: true })
 
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation)
+      window.removeEventListener('deviceorientationabsolute', handleOrientation)
       window.removeEventListener('devicemotion', handleMotion)
+      window.removeEventListener('touchstart', enableGyroOnGesture)
+      window.removeEventListener('pointerdown', enableGyroOnGesture)
+      window.removeEventListener('click', enableGyroOnGesture)
     }
   }, [])
 
@@ -227,8 +270,8 @@ export default function ThemeToggle({ className = '' }) {
       const dt = Math.min(0.02, Math.max(0.008, rawDt))
       const sim = simRef.current
 
-      // Smooth gyro integration towards gravity tilt angle
-      const gyroSpeed = 5.5
+      // Smooth gyro integration towards gravity tilt angle (rapid 8.5 speed)
+      const gyroSpeed = 8.5
       sim.gyroX += (sim.gyroTargetX - sim.gyroX) * Math.min(1, dt * gyroSpeed)
 
       if (sim.isDragging) {
@@ -243,14 +286,14 @@ export default function ThemeToggle({ className = '' }) {
         const springK = 380
         const dampingC = 19.5
         // Centrifugal tension from horizontal swing (lifts slightly at swing extremes)
-        const centrifugalLift = Math.min(7, (sim.vx * sim.vx) * 0.0006)
-        const ay = -springK * sim.pullY - dampingC * sim.vy + centrifugalLift * 40
+        const centrifugalLift = Math.min(8, (sim.vx * sim.vx) * 0.0007)
+        const ay = -springK * sim.pullY - dampingC * sim.vy + centrifugalLift * 42
         sim.vy += ay * dt
         sim.pullY += sim.vy * dt
 
-        // 2. Horizontal Pendulum Sway Physics with Gyro Gravity Bias
-        const pendulumK = 48
-        const pendulumDamp = 3.2
+        // 2. Horizontal Pendulum Sway Physics with 100% Gyro Gravity Bias
+        const pendulumK = 46
+        const pendulumDamp = 3.0
         // Effective gravity pulls towards sim.gyroX when phone is tilted
         const ax = -pendulumK * (sim.swayX - sim.gyroX) - pendulumDamp * sim.vx
         sim.vx += ax * dt
@@ -261,11 +304,11 @@ export default function ThemeToggle({ className = '' }) {
         sim.wavePhase += dt * (14 + Math.abs(sim.vx) * 0.25)
 
         // Stability clamping
-        if (Math.abs(sim.pullY) < 0.04 && Math.abs(sim.vy) < 0.04) {
+        if (Math.abs(sim.pullY) < 0.03 && Math.abs(sim.vy) < 0.03) {
           sim.pullY = 0
           sim.vy = 0
         }
-        if (Math.abs(sim.swayX - sim.gyroX) < 0.04 && Math.abs(sim.vx) < 0.04) {
+        if (Math.abs(sim.swayX - sim.gyroX) < 0.03 && Math.abs(sim.vx) < 0.03) {
           sim.swayX = sim.gyroX
           sim.vx = 0
         }
