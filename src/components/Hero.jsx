@@ -1,6 +1,7 @@
 import MagneticText from './MagneticText'
 import ProximityText from './ProximityText'
 import Reveal from './Reveal'
+import EarthIcon from './EarthIcon'
 
 export default function Hero() {
   const scrollTo = (id) => {
@@ -19,8 +20,9 @@ export default function Hero() {
     <section id="home" className="hero-section">
       <div className="container hero-inner">
         <div className="hero-top-status">
+          <EarthIcon size={14} className="hero-status-earth" />
           <span className="status-dot" />
-          <span className="status-text">AVAILABLE FOR SELECTIVE CREATIVE DIRECTING & DEVELOPMENT</span>
+          <span className="status-text">AVAILABLE FOR SELECTIVE CREATIVE DIRECTING &amp; DEVELOPMENT</span>
         </div>
 
         <Reveal className="hero-content">

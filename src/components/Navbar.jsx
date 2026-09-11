@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import MagneticText from './MagneticText'
-import ThemeToggle from './ThemeToggle'
+import Logo from './Logo'
+import EarthIcon from './EarthIcon'
 
 const EDITORIAL_NAV_LINKS = [
   { label: 'WHO', id: 'who' },
@@ -43,14 +44,28 @@ export default function Navbar() {
   return (
     <header className={`editorial-nav ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="container nav-inner">
-        <MagneticText strength={0.2} as="a" href="#home" className="nav-brand" onClick={(e) => { e.preventDefault(); scrollToSection('home') }}>
-          <span className="brand-dot" />
-          <span className="brand-text">MANAS BANDHU</span>
+        {/* Brand Name Logo */}
+        <MagneticText
+          strength={0.2}
+          as="a"
+          href="#home"
+          className="nav-brand-anchor"
+          onClick={(e) => {
+            e.preventDefault()
+            scrollToSection('home')
+          }}
+        >
+          <Logo size="compact" showText={true} />
         </MagneticText>
 
-        <div className="nav-right-cluster">
-          <ThemeToggle className="theme-toggle-desktop" />
+        {/* Top Tab Earth Indicator */}
+        <div className="nav-top-earth-tab" title="Worldwide Creative Operations">
+          <EarthIcon size={18} />
+          <span className="earth-tab-label">GLOBAL // 24.8°N</span>
+          <span className="earth-status-ping" />
+        </div>
 
+        <div className="nav-right-cluster">
           <button
             className={`nav-menu-toggle ${menuOpen ? 'is-active' : ''}`}
             onClick={() => setMenuOpen(!menuOpen)}
@@ -63,16 +78,24 @@ export default function Navbar() {
 
         <nav className={`nav-links-wrap ${menuOpen ? 'is-open' : ''}`}>
           {EDITORIAL_NAV_LINKS.map((link) => (
-            <MagneticText key={link.id} strength={0.2} as="button" className="nav-link-btn" onClick={() => scrollToSection(link.id)}>
+            <MagneticText
+              key={link.id}
+              strength={0.2}
+              as="button"
+              className="nav-link-btn"
+              onClick={() => scrollToSection(link.id)}
+            >
               {link.label}
             </MagneticText>
           ))}
-          <MagneticText strength={0.3} as="button" className="nav-cta-btn" onClick={() => scrollToSection('contact')}>
+          <MagneticText
+            strength={0.3}
+            as="button"
+            className="nav-cta-btn"
+            onClick={() => scrollToSection('contact')}
+          >
             LET'S TALK
           </MagneticText>
-          <div className="nav-mobile-theme-slot">
-            <ThemeToggle />
-          </div>
         </nav>
       </div>
     </header>
