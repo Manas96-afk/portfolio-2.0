@@ -210,21 +210,21 @@ export default function ThemeToggle({ className = '' }) {
       const tiltRad = (clampedDegrees * Math.PI) / 180
 
       // True physical pendulum equilibrium: X = Length * sin(tiltAngle)
-      // With L = 84px: at 30° -> 42px, at 45° -> 59.4px, at 60° -> 72px!
-      const targetTiltX = Math.sin(tiltRad) * 68
+      // With L = 84px: at 30° -> 42px, at 45° -> 59px, at 60° -> 70px!
+      const targetTiltX = Math.sin(tiltRad) * 65
 
       // Calculate angular jerk velocity for natural dynamic flick impulses
       const dGamma = clampedDegrees - lastGamma
       const angularVel = dGamma / dt
-      lastGamma = clampedGamma
+      lastGamma = clampedDegrees
 
       const sim = simRef.current
       sim.gyroTargetX = targetTiltX
 
       // If user tilts the phone rapidly or flicks it, impart natural rotational impulse
-      if (Math.abs(angularVel) > 35 && !sim.isDragging) {
-        sim.vx += Math.max(-18, Math.min(18, angularVel * 0.12))
-        sim.waveAmp += Math.max(-6, Math.min(6, angularVel * 0.06))
+      if (Math.abs(angularVel) > 25 && !sim.isDragging) {
+        sim.vx += Math.max(-20, Math.min(20, angularVel * 0.14))
+        sim.waveAmp += Math.max(-7, Math.min(7, angularVel * 0.08))
       }
     }
 
@@ -235,9 +235,9 @@ export default function ThemeToggle({ className = '' }) {
       if (sim.isDragging) return
 
       // Lateral phone shake/jolt (acc.x in m/s^2)
-      if (typeof acc.x === 'number' && Math.abs(acc.x) > 1.0) {
-        sim.vx -= Math.max(-16, Math.min(16, acc.x * 2.2))
-        sim.waveAmp += (Math.random() > 0.5 ? 1 : -1) * 2.8
+      if (typeof acc.x === 'number' && Math.abs(acc.x) > 0.8) {
+        sim.vx -= Math.max(-18, Math.min(18, acc.x * 2.5))
+        sim.waveAmp += (Math.random() > 0.5 ? 1 : -1) * 3.2
       }
     }
 
@@ -260,9 +260,55 @@ export default function ThemeToggle({ className = '' }) {
     }
   }, [])
 
-  // Continuous 60-120 FPS harmonic oscillator loop with Gyro & Multi-Harmonic Physics
+  // Page Scroll Momentum & Global Touch/Cursor Breeze Physics
+  useEffect(() => {
+    let lastScrollY = typeof window !== 'undefined' ? window.scrollY : 0
+    let lastScrollTime = performance.now()
+
+    const handleScroll = () => {
+      const now = performance.now()
+      const dt = Math.max(0.008, (now - lastScrollTime) / 1000)
+      const currentScrollY = window.scrollY
+      const scrollVelocity = (currentScrollY - lastScrollY) / dt
+      lastScrollY = currentScrollY
+      lastScrollTime = now
+
+      // Page scroll acceleration kicks the chain pendulum with inertia
+      const sim = simRef.current
+      if (!sim.isDragging) {
+        const kick = Math.max(-22, Math.min(22, scrollVelocity * 0.015))
+        sim.vx += kick
+        sim.waveAmp += Math.max(-5, Math.min(5, kick * 0.25))
+      }
+    }
+
+    const handleWindowPointerMove = (e) => {
+      const sim = simRef.current
+      if (sim.isDragging) return
+      // When cursor/touch moves anywhere in top-right sector, breeze displaces chain
+      const dx = e.clientX - (window.innerWidth - 60)
+      const dy = e.clientY - 60
+      const dist = Math.hypot(dx, dy)
+      if (dist < 260) {
+        const strength = (1 - dist / 260) * 2.2
+        sim.vx += (dx > 0 ? -1 : 1) * strength
+        sim.waveAmp += (dx > 0 ? 1 : -1) * (strength * 1.4)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('pointermove', handleWindowPointerMove, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('pointermove', handleWindowPointerMove)
+    }
+  }, [])
+
+  // Continuous 60-120 FPS harmonic oscillator loop with Gyro & Elastic Bounce Physics
   useEffect(() => {
     let lastTime = performance.now()
+    let breezePhase = 0
 
     const loop = (now) => {
       const rawDt = (now - lastTime) / 1000
@@ -274,6 +320,10 @@ export default function ThemeToggle({ className = '' }) {
       const gyroSpeed = 8.5
       sim.gyroX += (sim.gyroTargetX - sim.gyroX) * Math.min(1, dt * gyroSpeed)
 
+      // Ambient living breath / gentle ceiling air draft
+      breezePhase += dt * 1.6
+      const ambientBreeze = Math.sin(breezePhase) * 2.2 + Math.cos(breezePhase * 0.65) * 1.1
+
       if (sim.isDragging) {
         // Smooth pointer tracking with responsive elastic grip
         sim.pullY += (sim.targetY - sim.pullY) * Math.min(1, dt * 26)
@@ -282,35 +332,30 @@ export default function ThemeToggle({ className = '' }) {
         sim.vx = 0
         sim.waveAmp = (sim.swayX / 35) * 3.5
       } else {
-        // 1. Vertical Hooke's Law Spring-Damper System with centrifugal tension
-        const springK = 380
-        const dampingC = 19.5
-        // Centrifugal tension from horizontal swing (lifts slightly at swing extremes)
-        const centrifugalLift = Math.min(8, (sim.vx * sim.vx) * 0.0007)
-        const ay = -springK * sim.pullY - dampingC * sim.vy + centrifugalLift * 42
+        // 1. Vertical Hooke's Law Spring-Damper System with elastic bounce
+        const springK = 320
+        const dampingC = 11.5 // Tangible spring bounce
+        const centrifugalLift = Math.min(9, (sim.vx * sim.vx) * 0.0007)
+        const ay = -springK * sim.pullY - dampingC * sim.vy + centrifugalLift * 45
         sim.vy += ay * dt
         sim.pullY += sim.vy * dt
 
-        // 2. Horizontal Pendulum Sway Physics with 100% Gyro Gravity Bias
-        const pendulumK = 46
-        const pendulumDamp = 3.0
-        // Effective gravity pulls towards sim.gyroX when phone is tilted
-        const ax = -pendulumK * (sim.swayX - sim.gyroX) - pendulumDamp * sim.vx
+        // 2. Horizontal Pendulum Sway Physics with 100% Gyro Gravity + Ambient Breeze
+        const pendulumK = 38
+        const pendulumDamp = 1.8 // Rich multi-swing pendulum momentum
+        const targetEquilibrium = sim.gyroX + (sim.gyroTargetX === 0 ? ambientBreeze : 0)
+        const ax = -pendulumK * (sim.swayX - targetEquilibrium) - pendulumDamp * sim.vx
         sim.vx += ax * dt
         sim.swayX += sim.vx * dt
 
         // 3. Transverse Wave Dissipation & Dynamic Ripple
-        sim.waveAmp *= Math.pow(0.93, dt * 60)
+        sim.waveAmp *= Math.pow(0.94, dt * 60)
         sim.wavePhase += dt * (14 + Math.abs(sim.vx) * 0.25)
 
         // Stability clamping
         if (Math.abs(sim.pullY) < 0.03 && Math.abs(sim.vy) < 0.03) {
           sim.pullY = 0
           sim.vy = 0
-        }
-        if (Math.abs(sim.swayX - sim.gyroX) < 0.03 && Math.abs(sim.vx) < 0.03) {
-          sim.swayX = sim.gyroX
-          sim.vx = 0
         }
       }
 
@@ -337,19 +382,21 @@ export default function ThemeToggle({ className = '' }) {
     }
   }
 
-  // Programmatic quick pull-down with elastic bounce
+  // Programmatic quick pull-down with elastic bounce & lateral pendulum kick
   const triggerPullAnimation = () => {
     const sim = simRef.current
-    sim.pullY = PULL_THRESHOLD + 12
-    sim.vy = 35
-    sim.swayX = (Math.random() > 0.5 ? 1 : -1) * 4
+    sim.pullY = PULL_THRESHOLD + 14
+    sim.vy = 40
+    const direction = Math.random() > 0.5 ? 1 : -1
+    sim.swayX = direction * 12
+    sim.vx = direction * 18
 
     setTimeout(() => {
       triggerToggle()
       // Powerful elastic recoil impulse
-      sim.vy = -160
-      sim.vx = -sim.swayX * 6
-      sim.waveAmp = 5
+      sim.vy = -190
+      sim.vx = -direction * 35
+      sim.waveAmp = 7
     }, 130)
   }
 
@@ -377,10 +424,10 @@ export default function ThemeToggle({ className = '' }) {
       sim.hasMoved = true
     }
 
-    // Dynamic 2D pull target
+    // Dynamic 2D pull target with wide fluid lateral reach
     const rawPullY = Math.max(0, deltaY)
     const dampedY = Math.min(MAX_PULL_DISTANCE, Math.pow(rawPullY, 0.88) * 1.6)
-    const clampedSwayX = Math.max(-35, Math.min(35, deltaX * 0.55))
+    const clampedSwayX = Math.max(-65, Math.min(65, deltaX * 0.85))
 
     sim.targetY = dampedY
     sim.targetX = clampedSwayX
@@ -396,7 +443,7 @@ export default function ThemeToggle({ className = '' }) {
       e.currentTarget.releasePointerCapture(e.pointerId)
     } catch (_) {}
 
-    // 1. Quick tap / click without drag
+    // 1. Quick tap / click without drag -> trigger animated whip toggle
     if (!sim.hasMoved || sim.pullY < 5) {
       triggerPullAnimation()
       return
@@ -405,15 +452,16 @@ export default function ThemeToggle({ className = '' }) {
     // 2. Pulled past threshold -> Switch mode & impart elastic recoil impulse
     if (sim.pullY >= PULL_THRESHOLD) {
       triggerToggle()
-      // Upward snap velocity
-      sim.vy = -150
+      // Upward snap velocity with lively bounce
+      sim.vy = -190
       // Lateral pendulum whip velocity
-      sim.vx = -sim.swayX * 5.5
-      sim.waveAmp = 6
+      sim.vx = -sim.swayX * 6.5
+      sim.waveAmp = 8
     } else {
-      // Gentle release snap
-      sim.vy = -60
-      sim.vx = -sim.swayX * 2.5
+      // Gentle release snap with natural recoil
+      sim.vy = -95
+      sim.vx = -sim.swayX * 4.0
+      sim.waveAmp = 5
     }
   }
 
