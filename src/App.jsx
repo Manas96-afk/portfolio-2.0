@@ -3,6 +3,7 @@ import CinematicIntro from './components/CinematicIntro'
 import CustomCursor from './components/CustomCursor'
 import Loader from './components/Loader'
 import ThemeToggle from './components/ThemeToggle'
+import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import WhoIAm from './components/WhoIAm'
 import SelectedWork from './components/SelectedWork'
@@ -30,6 +31,7 @@ function App() {
       <CinematicIntro />
       {loading && <Loader onDone={() => setLoading(false)} />}
       <div className="page">
+        <Navbar />
         <ThemeToggle className="theme-toggle-floating" />
         <main>
           <Hero />
