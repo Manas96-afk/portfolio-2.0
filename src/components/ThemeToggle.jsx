@@ -70,8 +70,8 @@ function playPullClickSound(isLightNow) {
 
 const NUM_BEADS = 11
 const REST_TOTAL_LENGTH = 84
-const PULL_THRESHOLD = 26
-const MAX_PULL_DISTANCE = 56
+const PULL_THRESHOLD = 28
+const MAX_PULL_DISTANCE = 76
 const ANCHOR_X = 60
 const ANCHOR_Y = 0
 
@@ -321,39 +321,39 @@ export default function ThemeToggle({ className = '' }) {
       sim.gyroX += (sim.gyroTargetX - sim.gyroX) * Math.min(1, dt * gyroSpeed)
 
       // Ambient living breath / gentle ceiling air draft
-      breezePhase += dt * 1.6
-      const ambientBreeze = Math.sin(breezePhase) * 2.2 + Math.cos(breezePhase * 0.65) * 1.1
+      breezePhase += dt * 1.5
+      const ambientBreeze = Math.sin(breezePhase) * 2.8 + Math.cos(breezePhase * 0.6) * 1.4
 
       if (sim.isDragging) {
-        // Smooth pointer tracking with responsive elastic grip
-        sim.pullY += (sim.targetY - sim.pullY) * Math.min(1, dt * 26)
-        sim.swayX += (sim.targetX - sim.swayX) * Math.min(1, dt * 24)
+        // Soft rubber drag follow: lag smoothly behind pointer like a stretchy silicone band
+        sim.pullY += (sim.targetY - sim.pullY) * Math.min(1, dt * 18)
+        sim.swayX += (sim.targetX - sim.swayX) * Math.min(1, dt * 16)
         sim.vy = 0
         sim.vx = 0
-        sim.waveAmp = (sim.swayX / 35) * 3.5
+        sim.waveAmp = (sim.swayX / 26) * 4.5
       } else {
-        // 1. Vertical Hooke's Law Spring-Damper System with elastic bounce
-        const springK = 320
-        const dampingC = 11.5 // Tangible spring bounce
-        const centrifugalLift = Math.min(9, (sim.vx * sim.vx) * 0.0007)
-        const ay = -springK * sim.pullY - dampingC * sim.vy + centrifugalLift * 45
+        // 1. Soft Rubber-Band Spring-Damper System (Bouncy Bungee Jelly Recoil)
+        const rubberK = 190 // Soft elastic modulus for bouncy rubber stretch
+        const rubberDamp = 7.2 // Low damping for soft, playful squishy oscillations
+        const centrifugalLift = Math.min(10, (sim.vx * sim.vx) * 0.0008)
+        const ay = -rubberK * sim.pullY - rubberDamp * sim.vy + centrifugalLift * 45
         sim.vy += ay * dt
         sim.pullY += sim.vy * dt
 
-        // 2. Horizontal Pendulum Sway Physics with 100% Gyro Gravity + Ambient Breeze
-        const pendulumK = 38
-        const pendulumDamp = 1.8 // Rich multi-swing pendulum momentum
+        // 2. Soft Pendulum Sway Physics & Flexible Rubber Wobble
+        const pendulumK = 28 // Soft flexible pendulum restore for natural lazy swings
+        const pendulumDamp = 1.35 // Gentle air damping for long, organic swings
         const targetEquilibrium = sim.gyroX + (sim.gyroTargetX === 0 ? ambientBreeze : 0)
         const ax = -pendulumK * (sim.swayX - targetEquilibrium) - pendulumDamp * sim.vx
         sim.vx += ax * dt
         sim.swayX += sim.vx * dt
 
-        // 3. Transverse Wave Dissipation & Dynamic Ripple
-        sim.waveAmp *= Math.pow(0.94, dt * 60)
-        sim.wavePhase += dt * (14 + Math.abs(sim.vx) * 0.25)
+        // 3. Transverse Jelly Ripple Wave Dissipation
+        sim.waveAmp *= Math.pow(0.965, dt * 60)
+        sim.wavePhase += dt * (12 + Math.abs(sim.vx) * 0.28)
 
-        // Stability clamping
-        if (Math.abs(sim.pullY) < 0.03 && Math.abs(sim.vy) < 0.03) {
+        // Stability clamping (soft threshold)
+        if (Math.abs(sim.pullY) < 0.02 && Math.abs(sim.vy) < 0.02) {
           sim.pullY = 0
           sim.vy = 0
         }
@@ -424,10 +424,10 @@ export default function ThemeToggle({ className = '' }) {
       sim.hasMoved = true
     }
 
-    // Dynamic 2D pull target with wide fluid lateral reach
+    // Dynamic 2D pull target with soft rubber stretch & lateral flexibility
     const rawPullY = Math.max(0, deltaY)
-    const dampedY = Math.min(MAX_PULL_DISTANCE, Math.pow(rawPullY, 0.88) * 1.6)
-    const clampedSwayX = Math.max(-65, Math.min(65, deltaX * 0.85))
+    const dampedY = Math.min(MAX_PULL_DISTANCE, Math.pow(rawPullY, 0.84) * 2.1)
+    const clampedSwayX = Math.max(-75, Math.min(75, deltaX * 0.92))
 
     sim.targetY = dampedY
     sim.targetX = clampedSwayX
@@ -444,24 +444,24 @@ export default function ThemeToggle({ className = '' }) {
     } catch (_) {}
 
     // 1. Quick tap / click without drag -> trigger animated whip toggle
-    if (!sim.hasMoved || sim.pullY < 5) {
+    if (!sim.hasMoved || sim.pullY < 4) {
       triggerPullAnimation()
       return
     }
 
-    // 2. Pulled past threshold -> Switch mode & impart elastic recoil impulse
+    // 2. Pulled past threshold -> Switch mode & impart soft rubber bungee recoil
     if (sim.pullY >= PULL_THRESHOLD) {
       triggerToggle()
-      // Upward snap velocity with lively bounce
-      sim.vy = -190
+      // Bouncy bungee-like upward snap
+      sim.vy = -sim.pullY * 4.6
       // Lateral pendulum whip velocity
-      sim.vx = -sim.swayX * 6.5
-      sim.waveAmp = 8
+      sim.vx = -sim.swayX * 4.5
+      sim.waveAmp = Math.max(6, (Math.abs(sim.swayX) / 20) * 7.5)
     } else {
-      // Gentle release snap with natural recoil
-      sim.vy = -95
-      sim.vx = -sim.swayX * 4.0
-      sim.waveAmp = 5
+      // Gentle soft rubber snap with bouncy recoil
+      sim.vy = -sim.pullY * 3.4
+      sim.vx = -sim.swayX * 3.0
+      sim.waveAmp = 4.5
     }
   }
 
@@ -478,21 +478,21 @@ export default function ThemeToggle({ className = '' }) {
   const isEngaged = currentPull >= PULL_THRESHOLD
   const isLight = theme === 'light'
 
-  // Generate robust physical nodes with dynamic multi-segment chain curvature & inertia
+  // Generate ultra-soft, flexible rubber cord nodes with organic catenary curvature & jelly ripples
   const nodes = Array.from({ length: NUM_BEADS + 1 }, (_, i) => {
     if (i === 0) return { x: ANCHOR_X, y: ANCHOR_Y }
 
     const t = i / NUM_BEADS
-    // Higher-order catenary curve with weighted bottom pendant drag
-    const swayFactor = Math.pow(t, 1.2)
-    // S-curve momentum lag: as the handle moves, intermediate beads lag with momentum
-    const velocityLag = -sim.vx * 0.05 * Math.sin(t * Math.PI) * (1 - t)
-    // Transverse standing & traveling wave ripple along chain
-    const waveOffset = Math.sin(t * Math.PI * 1.4 + sim.wavePhase) * sim.waveAmp * (1 - Math.pow(t, 2))
+    // Soft rubber bending curve with natural flexible sag
+    const bendSag = Math.pow(t, 1.15)
+    // S-curve momentum lag: rubber cord flexes softly behind handle movement
+    const rubberLag = -sim.vx * 0.075 * Math.sin(t * Math.PI) * (1 - t * 0.5)
+    // Transverse soft rubber jelly wave ripple
+    const jellyWave = Math.sin(t * Math.PI * 1.5 + sim.wavePhase) * sim.waveAmp * (1 - Math.pow(t, 2.2))
 
-    const arcX = ANCHOR_X + sim.swayX * swayFactor + velocityLag + waveOffset
-    // Geometric pendulum arc conservation (slight lifting when swung sideways)
-    const arcShortening = (sim.swayX * sim.swayX) / (2 * (REST_TOTAL_LENGTH + 30))
+    const arcX = ANCHOR_X + sim.swayX * bendSag + rubberLag + jellyWave
+    // Elastic rubber pendulum arc conservation (slight lifting when swung sideways)
+    const arcShortening = (sim.swayX * sim.swayX) / (2 * (REST_TOTAL_LENGTH + 40))
     const arcY = ANCHOR_Y + Math.max(0, (totalLength - arcShortening) * t)
 
     return { x: arcX, y: arcY }
