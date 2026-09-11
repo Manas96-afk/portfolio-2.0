@@ -90,7 +90,7 @@ export default function ThemeToggle({ className = '' }) {
   const [showFlash, setShowFlash] = useState(false)
   const [, setFrameTick] = useState(0)
 
-  // Rock-solid 2nd-order analytical spring & pendulum simulation
+  // Rock-solid 2nd-order analytical spring & pendulum simulation with gyro tilt
   const simRef = useRef({
     // Vertical spring state
     pullY: 0,
@@ -101,6 +101,10 @@ export default function ThemeToggle({ className = '' }) {
     swayX: 0,
     vx: 0,
     targetX: 0,
+
+    // Gyroscope tilt target & smoothed angle (mobile orientation)
+    gyroX: 0,
+    gyroTargetX: 0,
 
     // Transverse wave amplitude & phase along the chain
     waveAmp: 0,
@@ -144,7 +148,76 @@ export default function ThemeToggle({ className = '' }) {
     setTheme(nextTheme)
   }, [theme])
 
-  // Continuous 60-120 FPS harmonic oscillator loop (Impossible to flip or invert)
+  // Request Gyroscope permission on iOS 13+ devices upon user interaction
+  const requestGyroPermission = useCallback(() => {
+    if (
+      typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function'
+    ) {
+      DeviceOrientationEvent.requestPermission()
+        .then(() => {})
+        .catch(() => {})
+    }
+  }, [])
+
+  // Gyroscope & Device Tilt / Motion listener (Phones & Tablets)
+  useEffect(() => {
+    let lastGamma = 0
+    let lastOrientationTime = performance.now()
+
+    const handleOrientation = (e) => {
+      // gamma: left-to-right roll angle in degrees [-90, +90]
+      const gamma = e.gamma
+      if (gamma == null) return
+
+      const now = performance.now()
+      const dt = Math.max(0.008, (now - lastOrientationTime) / 1000)
+      lastOrientationTime = now
+
+      // Clamped tilt angle [-55, +55]
+      const clampedGamma = Math.max(-55, Math.min(55, gamma))
+
+      // Realistic physical lean offset along X axis (-34px to +34px)
+      const targetTiltX = (clampedGamma / 55) * 34
+
+      // Angular velocity for tilt flick / jolt reaction
+      const dGamma = clampedGamma - lastGamma
+      const angularVel = dGamma / dt
+      lastGamma = clampedGamma
+
+      const sim = simRef.current
+      sim.gyroTargetX = targetTiltX
+
+      // Rapid phone tilt / rotation imparts dynamic momentum
+      if (Math.abs(angularVel) > 40 && !sim.isDragging) {
+        sim.vx += Math.max(-14, Math.min(14, angularVel * 0.08))
+        sim.waveAmp += Math.max(-4.5, Math.min(4.5, angularVel * 0.04))
+      }
+    }
+
+    const handleMotion = (e) => {
+      const acc = e.acceleration || e.accelerationIncludingGravity
+      if (!acc) return
+      const sim = simRef.current
+      if (sim.isDragging) return
+
+      // Lateral phone shake / impulse (acc.x in m/s^2)
+      if (typeof acc.x === 'number' && Math.abs(acc.x) > 1.2) {
+        sim.vx -= Math.max(-12, Math.min(12, acc.x * 1.6))
+        sim.waveAmp += (Math.random() > 0.5 ? 1 : -1) * 2.2
+      }
+    }
+
+    window.addEventListener('deviceorientation', handleOrientation, { passive: true })
+    window.addEventListener('devicemotion', handleMotion, { passive: true })
+
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation)
+      window.removeEventListener('devicemotion', handleMotion)
+    }
+  }, [])
+
+  // Continuous 60-120 FPS harmonic oscillator loop with Gyro & Multi-Harmonic Physics
   useEffect(() => {
     let lastTime = performance.now()
 
@@ -154,39 +227,46 @@ export default function ThemeToggle({ className = '' }) {
       const dt = Math.min(0.02, Math.max(0.008, rawDt))
       const sim = simRef.current
 
+      // Smooth gyro integration towards gravity tilt angle
+      const gyroSpeed = 5.5
+      sim.gyroX += (sim.gyroTargetX - sim.gyroX) * Math.min(1, dt * gyroSpeed)
+
       if (sim.isDragging) {
-        // Smooth pointer tracking
+        // Smooth pointer tracking with responsive elastic grip
         sim.pullY += (sim.targetY - sim.pullY) * Math.min(1, dt * 26)
         sim.swayX += (sim.targetX - sim.swayX) * Math.min(1, dt * 24)
         sim.vy = 0
         sim.vx = 0
-        sim.waveAmp = (sim.swayX / 40) * 3
+        sim.waveAmp = (sim.swayX / 35) * 3.5
       } else {
-        // 1. Vertical Hooke's Law Spring-Damper System
+        // 1. Vertical Hooke's Law Spring-Damper System with centrifugal tension
         const springK = 380
-        const dampingC = 20
-        const ay = -springK * sim.pullY - dampingC * sim.vy
+        const dampingC = 19.5
+        // Centrifugal tension from horizontal swing (lifts slightly at swing extremes)
+        const centrifugalLift = Math.min(7, (sim.vx * sim.vx) * 0.0006)
+        const ay = -springK * sim.pullY - dampingC * sim.vy + centrifugalLift * 40
         sim.vy += ay * dt
         sim.pullY += sim.vy * dt
 
-        // 2. Horizontal Pendulum Sway Physics
+        // 2. Horizontal Pendulum Sway Physics with Gyro Gravity Bias
         const pendulumK = 48
-        const pendulumDamp = 3.6
-        const ax = -pendulumK * sim.swayX - pendulumDamp * sim.vx
+        const pendulumDamp = 3.2
+        // Effective gravity pulls towards sim.gyroX when phone is tilted
+        const ax = -pendulumK * (sim.swayX - sim.gyroX) - pendulumDamp * sim.vx
         sim.vx += ax * dt
         sim.swayX += sim.vx * dt
 
-        // 3. Transverse Wave Dissipation
-        sim.waveAmp *= Math.pow(0.92, dt * 60)
-        sim.wavePhase += dt * 16
+        // 3. Transverse Wave Dissipation & Dynamic Ripple
+        sim.waveAmp *= Math.pow(0.93, dt * 60)
+        sim.wavePhase += dt * (14 + Math.abs(sim.vx) * 0.25)
 
         // Stability clamping
-        if (Math.abs(sim.pullY) < 0.05 && Math.abs(sim.vy) < 0.05) {
+        if (Math.abs(sim.pullY) < 0.04 && Math.abs(sim.vy) < 0.04) {
           sim.pullY = 0
           sim.vy = 0
         }
-        if (Math.abs(sim.swayX) < 0.05 && Math.abs(sim.vx) < 0.05) {
-          sim.swayX = 0
+        if (Math.abs(sim.swayX - sim.gyroX) < 0.04 && Math.abs(sim.vx) < 0.04) {
+          sim.swayX = sim.gyroX
           sim.vx = 0
         }
       }
@@ -232,6 +312,7 @@ export default function ThemeToggle({ className = '' }) {
 
   // Pointer drag interactions (works seamlessly on Mouse & Touch)
   const handlePointerDown = (e) => {
+    requestGyroPermission()
     e.currentTarget.setPointerCapture(e.pointerId)
     const sim = simRef.current
     sim.isDragging = true
@@ -306,14 +387,22 @@ export default function ThemeToggle({ className = '' }) {
   const isEngaged = currentPull >= PULL_THRESHOLD
   const isLight = theme === 'light'
 
-  // Generate robust physical nodes guaranteed to hang downwards
+  // Generate robust physical nodes with dynamic multi-segment chain curvature & inertia
   const nodes = Array.from({ length: NUM_BEADS + 1 }, (_, i) => {
     if (i === 0) return { x: ANCHOR_X, y: ANCHOR_Y }
 
     const t = i / NUM_BEADS
-    // Natural catenary arc + transverse wave along the chain
-    const arcX = ANCHOR_X + sim.swayX * Math.pow(t, 1.15) + Math.sin(t * Math.PI + sim.wavePhase) * sim.waveAmp * (1 - t)
-    const arcY = ANCHOR_Y + totalLength * t
+    // Higher-order catenary curve with weighted bottom pendant drag
+    const swayFactor = Math.pow(t, 1.2)
+    // S-curve momentum lag: as the handle moves, intermediate beads lag with momentum
+    const velocityLag = -sim.vx * 0.05 * Math.sin(t * Math.PI) * (1 - t)
+    // Transverse standing & traveling wave ripple along chain
+    const waveOffset = Math.sin(t * Math.PI * 1.4 + sim.wavePhase) * sim.waveAmp * (1 - Math.pow(t, 2))
+
+    const arcX = ANCHOR_X + sim.swayX * swayFactor + velocityLag + waveOffset
+    // Geometric pendulum arc conservation (slight lifting when swung sideways)
+    const arcShortening = (sim.swayX * sim.swayX) / (2 * (REST_TOTAL_LENGTH + 30))
+    const arcY = ANCHOR_Y + Math.max(0, (totalLength - arcShortening) * t)
 
     return { x: arcX, y: arcY }
   })
