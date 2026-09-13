@@ -56,6 +56,10 @@ export default function FinalCTA({ onOpenCoffee }) {
             </MagneticText>
           ))}
         </Reveal>
+
+        <p className="cta-copyright">
+          © {new Date().getFullYear()} MANAS BANDHU — ALL RIGHTS RESERVED.
+        </p>
       </div>
     </section>
   )

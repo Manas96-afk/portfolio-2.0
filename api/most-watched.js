@@ -38,13 +38,64 @@ export function formatSubscribers(num) {
   return n.toLocaleString()
 }
 
+export const FALLBACK_VIDEOS = [
+  {
+    id: '4iaZf9-LTuQ',
+    title: 'The Greatest of All Time Cars (G.O.A.T. Cars)',
+    thumbnail: 'https://i.ytimg.com/vi/4iaZf9-LTuQ/maxresdefault.jpg',
+    viewCount: 22380,
+    formattedViews: '22.4K VIEWS',
+    watchUrl: 'https://www.youtube.com/watch?v=4iaZf9-LTuQ',
+    publishedAt: '2025-07-29T04:30:03Z',
+  },
+  {
+    id: '3xxPzTvSlMs',
+    title: 'I Cooked a MacBook Using Only Windows Software',
+    thumbnail: 'https://i.ytimg.com/vi/3xxPzTvSlMs/maxresdefault.jpg',
+    viewCount: 6971,
+    formattedViews: '7K VIEWS',
+    watchUrl: 'https://www.youtube.com/watch?v=3xxPzTvSlMs',
+    publishedAt: '2025-11-01T06:30:02Z',
+  },
+  {
+    id: 'TmAw6PIbkLc',
+    title: 'The Pink Kitty BMW - A Black Edition',
+    thumbnail: 'https://i.ytimg.com/vi/TmAw6PIbkLc/maxresdefault.jpg',
+    viewCount: 5162,
+    formattedViews: '5.2K VIEWS',
+    watchUrl: 'https://www.youtube.com/watch?v=TmAw6PIbkLc',
+    publishedAt: '2025-07-10T07:30:22Z',
+  },
+  {
+    id: 'rZZEE88Nl-s',
+    title: 'say the word on beat challenge',
+    thumbnail: 'https://i.ytimg.com/vi/rZZEE88Nl-s/maxresdefault.jpg',
+    viewCount: 4423,
+    formattedViews: '4.4K VIEWS',
+    watchUrl: 'https://www.youtube.com/watch?v=rZZEE88Nl-s',
+    publishedAt: '2026-01-07T09:30:36Z',
+  },
+]
+
+export const FALLBACK_CHANNEL_STATS = {
+  title: 'cnomo editz',
+  handle: '@cnomo_editz',
+  subscriberCount: 186,
+  formattedSubscribers: '186',
+  totalViews: 110825,
+  formattedTotalViews: '110.8K VIEWS',
+  videoCount: 79,
+  avatar: 'https://yt3.ggpht.com/xmBZgt2FAtRfaVShVldBHbBwvRq0iVzYve0rrlSkQxaVFc1EXf9RVNow7ptJHPtDqwfbRHiNHQ=s240-c-k-c0x00ffffff-no-rj',
+  channelUrl: 'https://www.youtube.com/@cnomo_editz',
+}
+
 export async function getMostWatchedVideos(apiKey, handle = 'cnomo_editz', channelId = null) {
   if (!apiKey) {
     return {
       configured: false,
-      videos: [],
-      channelStats: null,
-      message: 'YouTube API key not configured in environment',
+      videos: FALLBACK_VIDEOS,
+      channelStats: FALLBACK_CHANNEL_STATS,
+      message: 'Serving verified cache; add YOUTUBE_API_KEY for dynamic hourly live telemetry.',
     }
   }
 
@@ -255,12 +306,13 @@ export default async function handler(req, res) {
     const result = await getMostWatchedVideos(apiKey, handle, channelId)
     return res.status(200).json(result)
   } catch {
-    // Return sanitized response; never leak keys or internal errors
+    // Return sanitized fallback; never leak keys or internal errors
     return res.status(200).json({
       configured: true,
-      videos: [],
+      videos: FALLBACK_VIDEOS,
+      channelStats: FALLBACK_CHANNEL_STATS,
       fallback: true,
-      message: 'Video archive temporarily offline',
+      message: 'Serving fallback video archive',
     })
   }
 }

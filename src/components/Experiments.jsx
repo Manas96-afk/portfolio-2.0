@@ -4,55 +4,55 @@ import Reveal from './Reveal'
 
 const DEFAULT_EXPERIMENTS = [
   {
-    id: 'exp-1',
-    title: 'CYBERPUNK MOTION REEL',
-    tag: '3D VFX & KINETIC',
+    id: '4iaZf9-LTuQ',
+    title: 'The Greatest of All Time Cars (G.O.A.T. Cars)',
+    tag: 'YOUTUBE EDIT // #01',
     duration: 'YOUTUBE',
-    thumb: '/intro/ezgif-frame-040.jpg',
-    views: '120K+ Views',
+    thumb: 'https://i.ytimg.com/vi/4iaZf9-LTuQ/maxresdefault.jpg',
+    views: '22.4K Views',
     software: 'After Effects, Premiere Pro, Cinema 4D',
     style: 'High-Energy 3D Camera Motion & Beat Sync',
-    desc: 'Futuristic showreel blending fast-paced motion graphics, neon color grading, and heavy sound design.',
-    watchUrl: 'https://www.youtube.com/@cnomo_editz',
+    desc: 'The Greatest of All Time Cars (G.O.A.T. Cars) — high-octane automotive visuals with synchronized velocity ramps.',
+    watchUrl: 'https://www.youtube.com/watch?v=4iaZf9-LTuQ',
     offset: 'offset-left',
   },
   {
-    id: 'exp-2',
-    title: 'CINEMATIC TRAVEL DOC',
-    tag: 'SHORT FILM',
+    id: '3xxPzTvSlMs',
+    title: 'I Cooked a MacBook Using Only Windows Software',
+    tag: 'YOUTUBE EDIT // #02',
     duration: 'YOUTUBE',
-    thumb: '/intro/ezgif-frame-090.jpg',
-    views: '45K+ Views',
+    thumb: 'https://i.ytimg.com/vi/3xxPzTvSlMs/maxresdefault.jpg',
+    views: '7K Views',
     software: 'DaVinci Resolve, Premiere Pro',
-    style: 'Film Emulation, Match Cuts, Ambient Audio',
-    desc: 'Immersive visual story featuring natural color grading, organic speed ramps, and spatial audio soundscapes.',
-    watchUrl: 'https://www.youtube.com/@cnomo_editz',
+    style: 'Cinematic Storytelling & Fast-Paced Pacing',
+    desc: 'I Cooked a MacBook Using Only Windows Software — dynamic editing breakdown and hardware storytelling.',
+    watchUrl: 'https://www.youtube.com/watch?v=3xxPzTvSlMs',
     offset: 'offset-right',
   },
   {
-    id: 'exp-3',
-    title: 'ESPORTS VELOCITY MONTAGE',
-    tag: 'FPS GAMING EDIT',
+    id: 'TmAw6PIbkLc',
+    title: 'The Pink Kitty BMW - A Black Edition',
+    tag: 'YOUTUBE EDIT // #03',
     duration: 'YOUTUBE',
-    thumb: '/intro/ezgif-frame-140.jpg',
-    views: '200K+ Views',
+    thumb: 'https://i.ytimg.com/vi/TmAw6PIbkLc/maxresdefault.jpg',
+    views: '5.2K Views',
     software: 'After Effects, Premiere Pro',
-    style: 'Velocity Ramping, Impact SFX, Screen Shakes',
-    desc: 'Fast-paced gaming highlight edit with custom velocity curves, syncopated beat drops, and sharp gun sound effects.',
-    watchUrl: 'https://www.youtube.com/@cnomo_editz',
+    style: 'Velocity Ramping, Neon Color Grading & SFX',
+    desc: 'The Pink Kitty BMW - A Black Edition — stylized custom automotive edit with color pulsing and beat cuts.',
+    watchUrl: 'https://www.youtube.com/watch?v=TmAw6PIbkLc',
     offset: 'offset-center',
   },
   {
-    id: 'exp-4',
-    title: 'MOTIONVAULT PRESET PACK',
-    tag: 'ASSET VAULT',
+    id: 'rZZEE88Nl-s',
+    title: 'say the word on beat challenge',
+    tag: 'YOUTUBE EDIT // #04',
     duration: 'YOUTUBE',
-    thumb: '/intro/ezgif-frame-170.jpg',
-    views: '1,000+ Downloads',
-    software: 'Lightroom LUTs, Premiere Pro FX',
-    style: 'Color Grading & Sound FX Library',
-    desc: 'Curated digital asset pack featuring custom LUTs, transitions, sound effects, and After Effects presets.',
-    watchUrl: 'https://www.youtube.com/@cnomo_editz',
+    thumb: 'https://i.ytimg.com/vi/rZZEE88Nl-s/maxresdefault.jpg',
+    views: '4.4K Views',
+    software: 'Premiere Pro, Audition',
+    style: 'Frame-Accurate Beat Sync & Kinetic Visuals',
+    desc: 'say the word on beat challenge — rapid-fire audio-visual rhythm synchronization and kinetic pacing.',
+    watchUrl: 'https://www.youtube.com/watch?v=rZZEE88Nl-s',
     offset: 'offset-left',
   },
 ]
@@ -314,6 +314,12 @@ export default function Experiments() {
                     loading="lazy"
                     className="exp-img"
                     onLoad={updatePath}
+                    onError={(e) => {
+                      if (!e.currentTarget.dataset.triedHq && exp.thumb.includes('maxresdefault.jpg')) {
+                        e.currentTarget.dataset.triedHq = 'true'
+                        e.currentTarget.src = exp.thumb.replace('maxresdefault.jpg', 'hqdefault.jpg')
+                      }
+                    }}
                   />
                   <div className="exp-play-badge">▶ WATCH ON YOUTUBE ↗</div>
                   <div className="exp-duration">{exp.duration}</div>

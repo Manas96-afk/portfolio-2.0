@@ -9,7 +9,6 @@ import SelectedWork from './components/SelectedWork'
 import WhatIDo from './components/WhatIDo'
 import Experiments from './components/Experiments'
 import FinalCTA from './components/FinalCTA'
-import Footer from './components/Footer'
 import BuyMeCoffee from './components/BuyMeCoffee'
 import { useScrollVelocity } from './hooks/useScrollVelocity'
 import './App.css'
@@ -39,7 +38,6 @@ function App() {
           <Experiments />
           <FinalCTA onOpenCoffee={() => setCoffeeModalOpen(true)} />
         </main>
-        <Footer />
       </div>
 
       <BuyMeCoffee

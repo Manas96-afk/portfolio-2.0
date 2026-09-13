@@ -148,167 +148,9 @@ export default function ThemeToggle({ className = '' }) {
     setTheme(nextTheme)
   }, [theme])
 
-  // Request Gyroscope permission on iOS 13+ devices upon user interaction
-  const requestGyroPermission = useCallback(() => {
-    if (
-      typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function'
-    ) {
-      DeviceOrientationEvent.requestPermission()
-        .then(() => {})
-        .catch(() => {})
-    }
-  }, [])
-
-  // 100% Comprehensive Mobile Gyroscope & Accelerometer Physics Engine
-  useEffect(() => {
-    let lastGamma = 0
-    let lastOrientationTime = performance.now()
-
-    // Global one-time iOS 13+ permission request on any user touch/tap on window
-    const enableGyroOnGesture = () => {
-      if (
-        typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function'
-      ) {
-        DeviceOrientationEvent.requestPermission()
-          .then((state) => {
-            if (state === 'granted') {
-              window.addEventListener('deviceorientation', handleOrientation, { passive: true })
-            }
-          })
-          .catch(() => {})
-      }
-    }
-
-    const handleOrientation = (e) => {
-      // gamma: left-to-right roll angle in degrees [-90, +90]
-      // beta: front-to-back pitch angle in degrees [-180, +180]
-      const gamma = e.gamma
-      const beta = e.beta
-      if (gamma == null && beta == null) return
-
-      const now = performance.now()
-      const dt = Math.max(0.008, (now - lastOrientationTime) / 1000)
-      lastOrientationTime = now
-
-      // Screen rotation awareness (portrait vs landscape 90° / 270°)
-      const screenAngle = (window.screen?.orientation?.angle || window.orientation || 0)
-      let effectiveRoll = gamma || 0
-
-      if (screenAngle === 90) {
-        effectiveRoll = -(beta || 0)
-      } else if (screenAngle === 270 || screenAngle === -90) {
-        effectiveRoll = (beta || 0)
-      } else if (screenAngle === 180) {
-        effectiveRoll = -effectiveRoll
-      }
-
-      // Convert degrees to radians for 100% true physical gravity angle
-      // When holding phone, typical viewing angle tilt is between -55° and +55°
-      const clampedDegrees = Math.max(-65, Math.min(65, effectiveRoll))
-      const tiltRad = (clampedDegrees * Math.PI) / 180
-
-      // True physical pendulum equilibrium: X = Length * sin(tiltAngle)
-      // With L = 84px: at 30° -> 42px, at 45° -> 59px, at 60° -> 70px!
-      const targetTiltX = Math.sin(tiltRad) * 65
-
-      // Calculate angular jerk velocity for natural dynamic flick impulses
-      const dGamma = clampedDegrees - lastGamma
-      const angularVel = dGamma / dt
-      lastGamma = clampedDegrees
-
-      const sim = simRef.current
-      sim.gyroTargetX = targetTiltX
-
-      // If user tilts the phone rapidly or flicks it, impart natural rotational impulse
-      if (Math.abs(angularVel) > 25 && !sim.isDragging) {
-        sim.vx += Math.max(-20, Math.min(20, angularVel * 0.14))
-        sim.waveAmp += Math.max(-7, Math.min(7, angularVel * 0.08))
-      }
-    }
-
-    const handleMotion = (e) => {
-      const acc = e.acceleration || e.accelerationIncludingGravity
-      if (!acc) return
-      const sim = simRef.current
-      if (sim.isDragging) return
-
-      // Lateral phone shake/jolt (acc.x in m/s^2)
-      if (typeof acc.x === 'number' && Math.abs(acc.x) > 0.8) {
-        sim.vx -= Math.max(-18, Math.min(18, acc.x * 2.5))
-        sim.waveAmp += (Math.random() > 0.5 ? 1 : -1) * 3.2
-      }
-    }
-
-    window.addEventListener('deviceorientation', handleOrientation, { passive: true })
-    window.addEventListener('deviceorientationabsolute', handleOrientation, { passive: true })
-    window.addEventListener('devicemotion', handleMotion, { passive: true })
-
-    // Listen on first user gesture anywhere on window to unlock iOS gyro
-    window.addEventListener('touchstart', enableGyroOnGesture, { once: true, passive: true })
-    window.addEventListener('pointerdown', enableGyroOnGesture, { once: true, passive: true })
-    window.addEventListener('click', enableGyroOnGesture, { once: true, passive: true })
-
-    return () => {
-      window.removeEventListener('deviceorientation', handleOrientation)
-      window.removeEventListener('deviceorientationabsolute', handleOrientation)
-      window.removeEventListener('devicemotion', handleMotion)
-      window.removeEventListener('touchstart', enableGyroOnGesture)
-      window.removeEventListener('pointerdown', enableGyroOnGesture)
-      window.removeEventListener('click', enableGyroOnGesture)
-    }
-  }, [])
-
-  // Page Scroll Momentum & Global Touch/Cursor Breeze Physics
-  useEffect(() => {
-    let lastScrollY = typeof window !== 'undefined' ? window.scrollY : 0
-    let lastScrollTime = performance.now()
-
-    const handleScroll = () => {
-      const now = performance.now()
-      const dt = Math.max(0.008, (now - lastScrollTime) / 1000)
-      const currentScrollY = window.scrollY
-      const scrollVelocity = (currentScrollY - lastScrollY) / dt
-      lastScrollY = currentScrollY
-      lastScrollTime = now
-
-      // Page scroll acceleration kicks the chain pendulum with inertia
-      const sim = simRef.current
-      if (!sim.isDragging) {
-        const kick = Math.max(-22, Math.min(22, scrollVelocity * 0.015))
-        sim.vx += kick
-        sim.waveAmp += Math.max(-5, Math.min(5, kick * 0.25))
-      }
-    }
-
-    const handleWindowPointerMove = (e) => {
-      const sim = simRef.current
-      if (sim.isDragging) return
-      // When cursor/touch moves anywhere in top-right sector, breeze displaces chain
-      const dx = e.clientX - (window.innerWidth - 60)
-      const dy = e.clientY - 60
-      const dist = Math.hypot(dx, dy)
-      if (dist < 260) {
-        const strength = (1 - dist / 260) * 2.2
-        sim.vx += (dx > 0 ? -1 : 1) * strength
-        sim.waveAmp += (dx > 0 ? 1 : -1) * (strength * 1.4)
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('pointermove', handleWindowPointerMove, { passive: true })
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('pointermove', handleWindowPointerMove)
-    }
-  }, [])
-
-  // Continuous 60-120 FPS harmonic oscillator loop with Gyro & Elastic Bounce Physics
+  // Continuous 60 FPS harmonic oscillator loop with Clean Mechanical Spring Physics
   useEffect(() => {
     let lastTime = performance.now()
-    let breezePhase = 0
 
     const loop = (now) => {
       const rawDt = (now - lastTime) / 1000
@@ -316,46 +158,40 @@ export default function ThemeToggle({ className = '' }) {
       const dt = Math.min(0.02, Math.max(0.008, rawDt))
       const sim = simRef.current
 
-      // Smooth gyro integration towards gravity tilt angle (rapid 8.5 speed)
-      const gyroSpeed = 8.5
-      sim.gyroX += (sim.gyroTargetX - sim.gyroX) * Math.min(1, dt * gyroSpeed)
-
-      // Ambient living breath / gentle ceiling air draft
-      breezePhase += dt * 1.5
-      const ambientBreeze = Math.sin(breezePhase) * 2.8 + Math.cos(breezePhase * 0.6) * 1.4
-
       if (sim.isDragging) {
-        // Soft rubber drag follow: lag smoothly behind pointer like a stretchy silicone band
-        sim.pullY += (sim.targetY - sim.pullY) * Math.min(1, dt * 14)
-        sim.swayX += (sim.targetX - sim.swayX) * Math.min(1, dt * 12)
+        // Drag follow: track pointer smoothly
+        sim.pullY += (sim.targetY - sim.pullY) * Math.min(1, dt * 18)
+        sim.swayX += (sim.targetX - sim.swayX) * Math.min(1, dt * 16)
         sim.vy = 0
         sim.vx = 0
-        sim.waveAmp = (sim.swayX / 22) * 5.0
+        sim.waveAmp = (sim.swayX / 22) * 3.0
       } else {
-        // 1. Soft Rubber-Band Spring-Damper System (Bouncy Bungee Jelly Recoil)
-        const rubberK = 135 // Ultra-soft elastic modulus for rubbery stretch
-        const rubberDamp = 4.8 // Low damping for multi-cycle bouncy squishy oscillations
-        const centrifugalLift = Math.min(12, (sim.vx * sim.vx) * 0.001)
-        const ay = -rubberK * sim.pullY - rubberDamp * sim.vy + centrifugalLift * 45
+        // 1. Vertical Rubber-Band Spring-Damper System (Crisp, High-End Return)
+        const rubberK = 220
+        const rubberDamp = 14
+        const ay = -rubberK * sim.pullY - rubberDamp * sim.vy
         sim.vy += ay * dt
         sim.pullY += sim.vy * dt
 
-        // 2. Soft Pendulum Sway Physics & Flexible Rubber Wobble
-        const pendulumK = 22 // Soft flexible pendulum restore for natural lazy swings
-        const pendulumDamp = 1.15 // Gentle air damping for long, organic swings
-        const targetEquilibrium = sim.gyroX + (sim.gyroTargetX === 0 ? ambientBreeze : 0)
-        const ax = -pendulumK * (sim.swayX - targetEquilibrium) - pendulumDamp * sim.vx
+        // 2. Pendulum Sway Physics with Strong Air Damping (Quickly Settles to Zero)
+        const pendulumK = 45
+        const pendulumDamp = 6.0
+        const ax = -pendulumK * sim.swayX - pendulumDamp * sim.vx
         sim.vx += ax * dt
         sim.swayX += sim.vx * dt
 
-        // 3. Transverse Jelly Ripple Wave Dissipation
-        sim.waveAmp *= Math.pow(0.97, dt * 60)
-        sim.wavePhase += dt * (14 + Math.abs(sim.vx) * 0.3)
+        // 3. Transverse Wave Dissipation
+        sim.waveAmp *= Math.pow(0.85, dt * 60)
+        sim.wavePhase += dt * 12
 
-        // Stability clamping (soft threshold)
-        if (Math.abs(sim.pullY) < 0.03 && Math.abs(sim.vy) < 0.03) {
+        // Lock to standstill when close to rest (no jittering or lingering wiggles)
+        if (Math.abs(sim.pullY) < 0.1 && Math.abs(sim.vy) < 0.1) {
           sim.pullY = 0
           sim.vy = 0
+        }
+        if (Math.abs(sim.swayX) < 0.1 && Math.abs(sim.vx) < 0.1) {
+          sim.swayX = 0
+          sim.vx = 0
         }
       }
 
@@ -402,7 +238,6 @@ export default function ThemeToggle({ className = '' }) {
 
   // Pointer drag interactions (works seamlessly on Mouse & Touch)
   const handlePointerDown = (e) => {
-    requestGyroPermission()
     e.currentTarget.setPointerCapture(e.pointerId)
     const sim = simRef.current
     sim.isDragging = true
