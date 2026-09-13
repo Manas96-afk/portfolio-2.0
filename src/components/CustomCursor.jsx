@@ -15,11 +15,19 @@ export default function CustomCursor() {
     let ringY = -100
     let isVisibleLocal = false
     let rafId = null
+    let isRunning = false
+
+    const wakeAnimate = () => {
+      if (!isRunning) {
+        isRunning = true
+        rafId = requestAnimationFrame(animate)
+      }
+    }
 
     const animate = () => {
       // Smooth spring lerp for cursor ring
-      ringX += (mouseX - ringX) * 0.18
-      ringY += (mouseY - ringY) * 0.18
+      ringX += (mouseX - ringX) * 0.22
+      ringY += (mouseY - ringY) * 0.22
 
       if (dotRef.current) {
         dotRef.current.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`
@@ -28,7 +36,17 @@ export default function CustomCursor() {
         ringRef.current.style.transform = `translate3d(${ringX.toFixed(2)}px, ${ringY.toFixed(2)}px, 0)`
       }
 
-      rafId = requestAnimationFrame(animate)
+      if (Math.abs(mouseX - ringX) > 0.15 || Math.abs(mouseY - ringY) > 0.15) {
+        rafId = requestAnimationFrame(animate)
+      } else {
+        ringX = mouseX
+        ringY = mouseY
+        if (ringRef.current) {
+          ringRef.current.style.transform = `translate3d(${ringX.toFixed(2)}px, ${ringY.toFixed(2)}px, 0)`
+        }
+        isRunning = false
+        rafId = null
+      }
     }
 
     const onMouseMove = (e) => {
@@ -47,16 +65,21 @@ export default function CustomCursor() {
         'a, button, [role="button"], .interactive, .magnetic-wrap, .proximity-text, .project-editorial-card, .exp-card, .btn-editorial, input, textarea'
       )
       setIsHovered(Boolean(isInteractive))
+      wakeAnimate()
     }
 
     const onMouseLeave = () => {
       isVisibleLocal = false
       setIsVisible(false)
+      isRunning = false
+      if (rafId) {
+        cancelAnimationFrame(rafId)
+        rafId = null
+      }
     }
 
     window.addEventListener('mousemove', onMouseMove, { passive: true })
     document.addEventListener('mouseleave', onMouseLeave)
-    rafId = requestAnimationFrame(animate)
 
     return () => {
       window.removeEventListener('mousemove', onMouseMove)

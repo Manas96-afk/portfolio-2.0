@@ -232,15 +232,16 @@ export default function Experiments() {
                 </linearGradient>
 
                 <radialGradient id="exp-glow-radial" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#ff5500" stopOpacity="0.85" />
-                  <stop offset="50%" stopColor="#ff2200" stopOpacity="0.3" />
+                  <stop offset="0%" stopColor="#ff6b00" stopOpacity="0.85" />
+                  <stop offset="40%" stopColor="#ff3b00" stopOpacity="0.4" />
                   <stop offset="100%" stopColor="#ff2200" stopOpacity="0" />
                 </radialGradient>
 
-                <filter id="exp-glow-filter" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3.5" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
+                <radialGradient id="exp-spark-radial" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+                  <stop offset="45%" stopColor="#ffaa00" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#ff4400" stopOpacity="0" />
+                </radialGradient>
               </defs>
 
               {/* Base guide track */}
@@ -261,7 +262,7 @@ export default function Experiments() {
                   rotate="auto"
                 />
                 <circle r="18" fill="url(#exp-glow-radial)" />
-                <circle r="7" fill="var(--accent)" filter="url(#exp-glow-filter)" />
+                <circle r="7" fill="var(--accent)" opacity="0.85" />
                 <circle r="3" fill="#ffffff" />
               </g>
 
@@ -274,7 +275,7 @@ export default function Experiments() {
                   repeatCount="indefinite"
                   rotate="auto"
                 />
-                <circle r="5" fill="#ffaa00" filter="url(#exp-glow-filter)" opacity="0.9" />
+                <circle r="10" fill="url(#exp-spark-radial)" />
                 <circle r="2" fill="#ffffff" />
               </g>
 

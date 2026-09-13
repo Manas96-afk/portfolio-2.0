@@ -52,22 +52,32 @@ export default function CinematicIntro() {
       { id: 'contact', opacity: 0.08 },
     ]
 
-    function getScrollTargetOpacity() {
-      const scrollCenter = window.scrollY + window.innerHeight * 0.45
-      const points = []
+    let cachedHeroTransitionRange = 600
+    let cachedSectionPoints = []
 
+    function updateMetrics() {
+      const heroEl = document.getElementById('home')
+      const heroHeight = heroEl ? heroEl.offsetHeight : window.innerHeight
+      cachedHeroTransitionRange = Math.max(200, heroHeight * 0.75)
+
+      const pts = []
       for (const sec of SECTION_TARGETS) {
-        let el = document.getElementById(sec.id)
-        if (!el && sec.id === 'contact') {
-          el = document.querySelector('footer')
-        }
+        const el = document.getElementById(sec.id)
         if (el) {
           const rect = el.getBoundingClientRect()
           const top = rect.top + window.scrollY
           const center = top + rect.height / 2
-          points.push({ center, opacity: sec.opacity })
+          pts.push({ center, opacity: sec.opacity })
         }
       }
+      if (pts.length > 0) {
+        cachedSectionPoints = pts
+      }
+    }
+
+    function getScrollTargetOpacity() {
+      const scrollCenter = window.scrollY + window.innerHeight * 0.45
+      const points = cachedSectionPoints
 
       if (points.length === 0) return 0.05
       if (scrollCenter <= points[0].center) return points[0].opacity
@@ -86,6 +96,7 @@ export default function CinematicIntro() {
     }
 
     function resize() {
+      updateMetrics()
       if (window.innerWidth < 768) return // Mobile uses video elements
       const dpr = Math.max(window.devicePixelRatio || 1, 2)
       const w = Math.round(window.innerWidth * dpr)
@@ -285,42 +296,47 @@ export default function CinematicIntro() {
     window.addEventListener('scroll', unlockVideos, { passive: true })
     window.addEventListener('click', unlockVideos, { passive: true })
 
-    // Unified 60-120 FPS Master Animation & Scroll Sync Loop
+    let isLoopRunning = false
+
+    function requestTick() {
+      if (!isLoopRunning) {
+        isLoopRunning = true
+        raf = requestAnimationFrame(loop)
+      }
+    }
+
+    // Unified Master Animation & Scroll Sync Loop (Sleeps when idle)
     function loop() {
       const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
       const rawP = Math.max(0, Math.min(1, window.scrollY / maxScroll))
 
-      // UNIFIED LERP: Both dark & light media follow the exact same physics curve
-      smoothedProgress += (rawP - smoothedProgress) * 0.12
-      if (Math.abs(rawP - smoothedProgress) < 0.0005) {
+      // UNIFIED LERP: Smooth progress follower
+      smoothedProgress += (rawP - smoothedProgress) * 0.16
+      if (Math.abs(rawP - smoothedProgress) < 0.0004) {
         smoothedProgress = rawP
       }
 
-      // Calculate hero scroll progress for right-to-center shifting
-      const heroEl = document.getElementById('home')
-      const heroHeight = heroEl ? heroEl.offsetHeight : window.innerHeight
+      // Calculate hero scroll progress using cached transition range
       const scrollY = window.scrollY || window.pageYOffset || 0
-      const heroTransitionRange = Math.max(200, heroHeight * 0.75)
-      const heroScrollProgress = Math.min(1, Math.max(0, scrollY / heroTransitionRange))
+      const heroScrollProgress = Math.min(1, Math.max(0, scrollY / cachedHeroTransitionRange))
 
       targetHeroShift = 1 - heroScrollProgress
-      currentHeroShift += (targetHeroShift - currentHeroShift) * 0.1
-      if (Math.abs(targetHeroShift - currentHeroShift) < 0.001) {
+      currentHeroShift += (targetHeroShift - currentHeroShift) * 0.14
+      if (Math.abs(targetHeroShift - currentHeroShift) < 0.0008) {
         currentHeroShift = targetHeroShift
       }
 
       const isMobile = window.innerWidth < 768
 
       if (isMobile) {
-        // Mobile Sync: Both dark and light video scrub with exact same time index
-        if (mobileDarkVideoRef.current && mobileDarkVideoRef.current.duration) {
-          syncVideoTime(mobileDarkVideoRef.current, smoothedProgress * mobileDarkVideoRef.current.duration)
-        }
-        if (mobileLightVideoRef.current && mobileLightVideoRef.current.duration) {
-          syncVideoTime(mobileLightVideoRef.current, smoothedProgress * mobileLightVideoRef.current.duration)
+        // Mobile Sync: Only sync the ACTIVE video matching the current theme to prevent dual-decoder mobile freezing
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+        const activeMobileVid = isLight ? mobileLightVideoRef.current : mobileDarkVideoRef.current
+        if (activeMobileVid && activeMobileVid.duration) {
+          syncVideoTime(activeMobileVid, smoothedProgress * activeMobileVid.duration)
         }
       } else {
-        // Desktop Sync: Both Dark Canvas and Light Canvas render synchronously with identical right-to-center shifting!
+        // Desktop Sync: Both Dark Canvas and Light Canvas render synchronously with identical right-to-center shifting
         const currentFrame = Math.round(smoothedProgress * (TOTAL - 1))
         if (currentFrame !== lastDrawn) primeWindow(currentFrame)
 
@@ -337,20 +353,29 @@ export default function CinematicIntro() {
 
       // Smooth dynamic overlay interpolation
       const targetOverlayOpacity = getScrollTargetOpacity()
-      currentOverlayOpacity += (targetOverlayOpacity - currentOverlayOpacity) * 0.08
+      currentOverlayOpacity += (targetOverlayOpacity - currentOverlayOpacity) * 0.1
       if (overlayRef.current) {
         overlayRef.current.style.opacity = currentOverlayOpacity.toFixed(4)
       }
 
       if (barRef.current) barRef.current.style.transform = `scaleX(${smoothedProgress})`
+
+      // Auto-sleep check: if motion is fully settled, stop running RAF until next scroll
+      if (
+        Math.abs(rawP - smoothedProgress) < 0.0004 &&
+        Math.abs(targetHeroShift - currentHeroShift) < 0.0008 &&
+        Math.abs(targetOverlayOpacity - currentOverlayOpacity) < 0.001
+      ) {
+        isLoopRunning = false
+        return
+      }
+
       raf = requestAnimationFrame(loop)
     }
 
-    const initHeroEl = document.getElementById('home')
-    const initHeroHeight = initHeroEl ? initHeroEl.offsetHeight : window.innerHeight
+    updateMetrics()
     const initScrollY = window.scrollY || window.pageYOffset || 0
-    const initRange = Math.max(200, initHeroHeight * 0.75)
-    const initProgress = Math.min(1, Math.max(0, initScrollY / initRange))
+    const initProgress = Math.min(1, Math.max(0, initScrollY / cachedHeroTransitionRange))
     currentHeroShift = 1 - initProgress
     targetHeroShift = 1 - initProgress
 
@@ -359,11 +384,13 @@ export default function CinematicIntro() {
       render(0)
     }
 
-    raf = requestAnimationFrame(loop)
-    window.addEventListener('resize', resize)
+    requestTick()
+    window.addEventListener('scroll', requestTick, { passive: true })
+    window.addEventListener('resize', resize, { passive: true })
 
     return () => {
       cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', requestTick)
       window.removeEventListener('resize', resize)
       window.removeEventListener('touchstart', unlockVideos)
       window.removeEventListener('scroll', unlockVideos)

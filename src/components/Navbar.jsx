@@ -15,8 +15,13 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
+    let currentScrolled = false
     const handleScroll = () => {
-      setScrolled(window.scrollY > 40)
+      const isPast = window.scrollY > 40
+      if (isPast !== currentScrolled) {
+        currentScrolled = isPast
+        setScrolled(isPast)
+      }
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })

@@ -118,6 +118,8 @@ export default function ThemeToggle({ className = '' }) {
 
   const containerRef = useRef(null)
   const animFrameId = useRef(null)
+  const isSimActiveRef = useRef(false)
+  const lastTimeRef = useRef(performance.now())
 
   // Sync theme with <html> attribute & storage
   useEffect(() => {
@@ -148,13 +150,15 @@ export default function ThemeToggle({ className = '' }) {
     setTheme(nextTheme)
   }, [theme])
 
-  // Continuous 60 FPS harmonic oscillator loop with Clean Mechanical Spring Physics
-  useEffect(() => {
-    let lastTime = performance.now()
+  // Wake up harmonic physics loop only when active force/velocity is present
+  const wakeSim = useCallback(() => {
+    if (isSimActiveRef.current) return
+    isSimActiveRef.current = true
+    lastTimeRef.current = performance.now()
 
     const loop = (now) => {
-      const rawDt = (now - lastTime) / 1000
-      lastTime = now
+      const rawDt = (now - lastTimeRef.current) / 1000
+      lastTimeRef.current = now
       const dt = Math.min(0.02, Math.max(0.008, rawDt))
       const sim = simRef.current
 
@@ -184,14 +188,23 @@ export default function ThemeToggle({ className = '' }) {
         sim.waveAmp *= Math.pow(0.85, dt * 60)
         sim.wavePhase += dt * 12
 
-        // Lock to standstill when close to rest (no jittering or lingering wiggles)
-        if (Math.abs(sim.pullY) < 0.1 && Math.abs(sim.vy) < 0.1) {
+        // Lock to standstill when close to rest (0% CPU, no jittering)
+        if (
+          Math.abs(sim.pullY) < 0.08 &&
+          Math.abs(sim.vy) < 0.08 &&
+          Math.abs(sim.swayX) < 0.08 &&
+          Math.abs(sim.vx) < 0.08 &&
+          Math.abs(sim.waveAmp) < 0.05
+        ) {
           sim.pullY = 0
           sim.vy = 0
-        }
-        if (Math.abs(sim.swayX) < 0.1 && Math.abs(sim.vx) < 0.1) {
           sim.swayX = 0
           sim.vx = 0
+          sim.waveAmp = 0
+          isSimActiveRef.current = false
+          animFrameId.current = null
+          setFrameTick((t) => (t + 1) % 1000000)
+          return
         }
       }
 
@@ -200,8 +213,14 @@ export default function ThemeToggle({ className = '' }) {
     }
 
     animFrameId.current = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(animFrameId.current)
   }, [])
+
+  useEffect(() => {
+    wakeSim()
+    return () => {
+      if (animFrameId.current) cancelAnimationFrame(animFrameId.current)
+    }
+  }, [wakeSim])
 
   // Cursor Proximity Wind Impulse
   const handleContainerMouseMove = (e) => {
@@ -215,6 +234,7 @@ export default function ThemeToggle({ className = '' }) {
       // Transfer subtle wind impulse to pendulum velocity
       simRef.current.vx += (mouseX > 0 ? -1 : 1) * 1.5
       simRef.current.waveAmp = (mouseX > 0 ? 1 : -1) * 2.5
+      wakeSim()
     }
   }
 
@@ -226,6 +246,7 @@ export default function ThemeToggle({ className = '' }) {
     const direction = Math.random() > 0.5 ? 1 : -1
     sim.swayX = direction * 14
     sim.vx = direction * 20
+    wakeSim()
 
     setTimeout(() => {
       triggerToggle()
@@ -233,6 +254,7 @@ export default function ThemeToggle({ className = '' }) {
       sim.vy = -180
       sim.vx = -direction * 36
       sim.waveAmp = 8
+      wakeSim()
     }, 130)
   }
 
@@ -246,6 +268,7 @@ export default function ThemeToggle({ className = '' }) {
 
     sim.dragStartX = e.clientX
     sim.dragStartY = e.clientY
+    wakeSim()
   }
 
   const handlePointerMove = (e) => {
@@ -268,6 +291,7 @@ export default function ThemeToggle({ className = '' }) {
 
     sim.targetY = dampedY
     sim.targetX = clampedSwayX
+    wakeSim()
   }
 
   const handlePointerUp = (e) => {
@@ -300,6 +324,7 @@ export default function ThemeToggle({ className = '' }) {
       sim.vx = -sim.swayX * 3.2
       sim.waveAmp = 5.5
     }
+    wakeSim()
   }
 
   const handleKeyDown = (e) => {

@@ -6,12 +6,17 @@ import { useEffect } from 'react'
  */
 export function useScrollVelocity() {
   useEffect(() => {
+    // Only run velocity stretch on desktop screens (>= 992px)
+    if (typeof window === 'undefined' || window.innerWidth < 992) return
+
     let lastScrollY = window.scrollY
     let lastTime = performance.now()
     let currentVel = 0
     let smoothVel = 0
     let rafId = null
     let isTicking = false
+    let lastAppliedStretch = 1
+    let lastAppliedCompress = 1
 
     const tick = (now) => {
       const dt = Math.max(1, now - lastTime)
@@ -24,15 +29,20 @@ export function useScrollVelocity() {
       // Silky spring lerp toward current velocity
       smoothVel += (currentVel - smoothVel) * 0.18
 
-      // Kinetic friction decay when user pauses scrolling
+      // Kinetic friction decay
       currentVel *= 0.86
 
-      const absVel = Math.min(Math.abs(smoothVel) * 0.055, 0.09)
+      const absVel = Math.min(Math.abs(smoothVel) * 0.05, 0.08)
       const stretchY = 1 + absVel
-      const compressX = 1 - absVel * 0.25
+      const compressX = 1 - absVel * 0.22
 
-      document.documentElement.style.setProperty('--scroll-stretch-y', stretchY.toFixed(4))
-      document.documentElement.style.setProperty('--scroll-compress-x', compressX.toFixed(4))
+      // Only update DOM styles if value changed significantly
+      if (Math.abs(stretchY - lastAppliedStretch) > 0.001 || Math.abs(compressX - lastAppliedCompress) > 0.001) {
+        lastAppliedStretch = stretchY
+        lastAppliedCompress = compressX
+        document.documentElement.style.setProperty('--scroll-stretch-y', stretchY.toFixed(4))
+        document.documentElement.style.setProperty('--scroll-compress-x', compressX.toFixed(4))
+      }
 
       lastScrollY = currentScrollY
       lastTime = now
@@ -40,8 +50,12 @@ export function useScrollVelocity() {
       if (Math.abs(smoothVel) > 0.0008 || Math.abs(currentVel) > 0.0008) {
         rafId = requestAnimationFrame(tick)
       } else {
-        document.documentElement.style.setProperty('--scroll-stretch-y', '1')
-        document.documentElement.style.setProperty('--scroll-compress-x', '1')
+        if (lastAppliedStretch !== 1 || lastAppliedCompress !== 1) {
+          document.documentElement.style.setProperty('--scroll-stretch-y', '1')
+          document.documentElement.style.setProperty('--scroll-compress-x', '1')
+          lastAppliedStretch = 1
+          lastAppliedCompress = 1
+        }
         isTicking = false
         rafId = null
       }
@@ -60,6 +74,8 @@ export function useScrollVelocity() {
     return () => {
       window.removeEventListener('scroll', onScroll)
       if (rafId) cancelAnimationFrame(rafId)
+      document.documentElement.style.setProperty('--scroll-stretch-y', '1')
+      document.documentElement.style.setProperty('--scroll-compress-x', '1')
     }
   }, [])
 }

@@ -3346,6 +3346,7 @@
     font-size: clamp(2.3rem, 9.5vw, 3.4rem);
     margin-bottom: 12px;
     line-height: 0.92;
+    color: #d1d5db;
   }
 
   .hero-editorial-meta {
@@ -3362,6 +3363,7 @@
     line-height: 1.5;
     margin-bottom: 20px;
     max-width: 100%;
+    color: #9ca3af;
   }
 
   .hero-actions {
@@ -3745,18 +3747,73 @@
   background: rgba(0, 0, 0, 0.06);
 }
 
-/* Hero & Typography Shadows in Light Mode (Crisp Black Text, No Muddy Dark Glow) */
+/* Hero & Typography in Light Mode */
 [data-theme="light"] .hero-top-status {
   background: rgba(0, 0, 0, 0.035);
   border-color: rgba(0, 0, 0, 0.08);
 }
 
-[data-theme="light"] .hero-title,
+[data-theme="light"] .hero-title {
+  color: var(--text-warm);
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.95), 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
 [data-theme="light"] .hero-sub,
 [data-theme="light"] .who-statement,
 [data-theme="light"] .watched-item-title,
 [data-theme="light"] .cta-headline {
   text-shadow: none !important;
+}
+
+/* Mobile & Tablet Over-Shirt Video Contrast Fix for Light Mode */
+/* On mobile, Manas wears his black shirt across the entire lower half of the screen. */
+/* Keeping the text white on mobile provides 100% clarity over his black shirt without adding any colored background or obscuring the video. */
+@media (max-width: 991px) {
+  [data-theme="light"] .intro-scrim,
+  [data-theme="light"] .intro-scrim-hero,
+  [data-theme="light"] .intro-scrim-base,
+  [data-theme="light"] .intro-vignette {
+    opacity: 0 !important;
+    background: none !important;
+  }
+
+  [data-theme="light"] .hero-title {
+    color: #d1d5db !important;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+  }
+
+  [data-theme="light"] .hero-sub {
+    color: #9ca3af !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+  }
+
+  [data-theme="light"] .hero-top-status {
+    background: rgba(0, 0, 0, 0.45) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  [data-theme="light"] .status-text {
+    color: #9ca3af !important;
+  }
+
+  [data-theme="light"] .editorial-divider {
+    color: rgba(255, 255, 255, 0.45) !important;
+  }
+
+  [data-theme="light"] .btn-editorial-ghost {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  [data-theme="light"] .btn-editorial-ghost:hover {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+  }
 }
 
 /* Navbar in Light Mode */
