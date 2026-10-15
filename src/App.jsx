@@ -4,6 +4,7 @@ import CustomCursor from './components/CustomCursor'
 import Loader from './components/Loader'
 import ThemeToggle from './components/ThemeToggle'
 import Hero from './components/Hero'
+import CreativeStudio from './components/CreativeStudio'
 import WhoIAm from './components/WhoIAm'
 import SelectedWork from './components/SelectedWork'
 import WhatIDo from './components/WhatIDo'
@@ -32,6 +33,7 @@ function App() {
         <ThemeToggle className="theme-toggle-floating" />
         <main>
           <Hero />
+          <CreativeStudio />
           <WhoIAm />
           <SelectedWork />
           <WhatIDo />
