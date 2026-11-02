@@ -1,0 +1,3 @@
+# SPA fallback — all routes (/gallery, /about, /studio, /contact, etc.)
+# are handled automatically by the SPA redirect.
+/*  /index.html  200

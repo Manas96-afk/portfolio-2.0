@@ -1,32 +1,206 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Personal portfolio of Manas Bandhu (cnomo_editz) — creator, video editor, and developer featuring cinematic visual experiences and creative projects."
-    />
-    <meta name="keywords" content="manas bandhu, cnomo_editz, manas, bandhu, portfolio" />
-    <meta name="author" content="Manas Bandhu" />
-    <meta name="google-site-verification" content="ZEQMX03VrzObIF9FUJLlvXsn0wjl-Z-LkJCuyfnexNQ" />
-    <meta property="og:title" content="Manas Bandhu — Portfolio" />
-    <meta property="og:description" content="Personal portfolio of Manas Bandhu (cnomo_editz) — creator, editor, and developer." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Manas Bandhu — Portfolio" />
-    <meta name="twitter:description" content="Personal portfolio of Manas Bandhu (cnomo_editz) — creator, editor, and developer." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <title>Manas Bandhu — Portfolio</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="preload" as="image" href="/textures/paper-texture.webp" type="image/webp" fetchpriority="high" crossorigin="anonymous">
+  <link rel="icon" type="image/png" href="/favico.png" />
+  <link rel="apple-touch-icon" href="/favico.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-site-verification" content="ZEQMX03VrzObIF9FUJLlvXsn0wjl-Z-LkJCuyfnexNQ" />
+  <meta name="theme-color" content="#fafafa" />
+
+  <!-- SEO Meta Tags -->
+  <title>Manas Bandhu | Video Editor, Motion Designer & Web Developer</title>
+  <meta name="description"
+    content="Interactive 3D portfolio by Manas Bandhu (@cnomo_editz). Explore cinematic video edits, motion graphics, and web projects in a hand-drawn gallery." />
+  <meta name="author" content="Manas Bandhu" />
+  <meta name="keywords"
+    content="Manas Bandhu, cnomo_editz, video editor portfolio, motion designer, web developer, video editing, motion graphics, React developer, creative portfolio" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://manas-bandhu.vercel.app/" />
+
+  <!-- Open Graph (Facebook, LinkedIn, Discord) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Manas Bandhu | Video Editor, Motion Designer & Web Developer" />
+  <meta property="og:description"
+    content="Interactive 3D portfolio by Manas Bandhu (@cnomo_editz). Explore cinematic video edits, motion graphics, and web projects in a hand-drawn gallery." />
+  <meta property="og:url" content="https://manas-bandhu.vercel.app/" />
+  <meta property="og:site_name" content="Manas Bandhu Portfolio" />
+  <meta property="og:image" content="https://manas-bandhu.vercel.app/og-image.webp" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Manas Bandhu | Video Editor, Motion Designer & Web Developer" />
+  <meta name="twitter:description"
+    content="Interactive 3D portfolio by Manas Bandhu (@cnomo_editz). Explore cinematic video edits, motion graphics, and web projects in a hand-drawn gallery." />
+  <meta name="twitter:image" content="https://manas-bandhu.vercel.app/og-image.webp" />
+
+  <!-- Google Fonts: Hand-drawn + Primary -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Gloria+Hallelujah&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* Absolute SEO text hiding - completely accessible to Googlebot, invisible to users */
+    .sr-only-seo {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- SEO Fallback for WebGL SPAs (2026 Crawl Optimization) -->
+  <div id="seo-content" class="sr-only-seo">
+    <header>
+      <h1>Manas Bandhu (@cnomo_editz) | Video Editor, Motion Designer & Web Developer Portfolio</h1>
+      <p>Interactive, WebGL-powered portfolio showcasing cinematic video editing, motion graphics, and modern web development.</p>
+    </header>
+
+    <nav aria-label="Main Navigation">
+      <ul>
+        <li><a href="/">Home (The Corridor)</a></li>
+        <li><a href="/gallery">The Gallery &amp; Projects</a></li>
+        <li><a href="/workshop">The Workshop (Skills)</a></li>
+        <li><a href="/edited-videos">Edited Videos (Video Work)</a></li>
+        <li><a href="/contact">Contact &amp; Socials</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <article id="home-corridor">
+        <header>
+          <h2>Experience the 3D Corridor: A Journey Through Motion and Code</h2>
+        </header>
+        <section>
+          <h3>Welcome to the Manas Bandhu Digital Universe</h3>
+          <p>
+            Welcome to the interactive 3D portfolio of <strong>Manas Bandhu</strong>, widely recognized in the digital space as <strong>@cnomo_editz</strong>.
+            If you are searching for a creative <strong>video editor</strong>, a skilled <strong>motion designer</strong>, or a <strong>web developer</strong> who treats the browser as a canvas, you have arrived at the right place.
+            This website is not just a standard resume; it is an immersive, fully interactive WebGL experience.
+            When you enter this portfolio, you find yourself in a carefully hand-drawn 3D corridor. Every texture, every frame, and every interactive element was custom-crafted to demonstrate what happens when cinematic editing meets modern web technology.
+          </p>
+          <p>
+            My goal is to bridge the gap between static web pages and cinematic, game-like experiences running natively in the browser.
+            Built with React Three Fiber, Three.js, and GSAP, this 3D corridor runs smoothly across devices, maintaining high performance without sacrificing visual fidelity.
+            The corridor serves as the central hub, with doors leading to different aspects of my work: my projects, my video edits, my story, and my contact information.
+          </p>
+        </section>
+      </article>
+
+      <article id="about-me">
+        <header>
+          <h2>About Manas Bandhu: The Editor and Developer Behind the Screen</h2>
+        </header>
+        <section>
+          <h3>My Creative Journey</h3>
+          <p>
+            My name is <strong>Manas Bandhu</strong> (@cnomo_editz), and I am a video editor, motion designer, and web developer based in Jaipur, India.
+            With over <strong>4 years</strong> of experience, I have produced <strong>150+ videos</strong> that have generated more than <strong>10 million views</strong>, alongside shipping <strong>25+ web projects</strong>.
+            I operate at the intersection of rhythm, motion, and clean code — crafting high-impact cinematic visual stories and experimental digital experiences.
+          </p>
+        </section>
+        <section>
+          <h3>Core Skills & Tools</h3>
+          <ul>
+            <li><strong>Video Editing:</strong> Advanced Adobe Premiere Pro, beat-synced cinematic edits, and frame-accurate cutting.</li>
+            <li><strong>Motion Graphics & VFX:</strong> Adobe After Effects for motion graphics, compositing, and visual effects.</li>
+            <li><strong>Colour Grading:</strong> DaVinci Resolve with 10-bit log footage and custom LUT grading.</li>
+            <li><strong>Sound Design:</strong> Custom audio design and mixing to elevate every cut.</li>
+            <li><strong>Web Development:</strong> React, TypeScript, JavaScript, HTML/CSS, and Vite for fast, modern sites.</li>
+            <li><strong>Creative Coding:</strong> Three.js, React Three Fiber, and GSAP for interactive 3D web experiences.</li>
+          </ul>
+        </section>
+      </article>
+
+      <article id="gallery-projects">
+        <header>
+          <h2>The Gallery: Selected Works</h2>
+        </header>
+        <p>
+          In the 3D gallery room, you can walk through an exhibition of my most significant projects. Here is a breakdown of the work created by Manas Bandhu.
+        </p>
+
+        <section>
+          <h3>Rasmalai — AI Desktop Assistant</h3>
+          <p>
+            <strong>Rasmalai</strong> is an AI desktop assistant built with Python and Gemini Flash.
+            It handles voice and vision commands, runs quietly in the system tray, and acts as a lightweight everyday companion on your computer — a hands-on exploration of practical, local-first AI.
+          </p>
+        </section>
+
+        <section>
+          <h3>DrugDex — Healthcare Platform</h3>
+          <p>
+            <strong>DrugDex</strong> is a healthcare platform with a Node and Express REST API.
+            It ships 11 REST endpoints and a fuzzy search engine for fast, forgiving medicine lookups, built to be reliable and easy to extend.
+          </p>
+        </section>
+
+        <section>
+          <h3>Manas — Personal Website</h3>
+          <p>
+            My personal portfolio site, built with TypeScript and React, styled with hand-tuned CSS and deployed on Vercel.
+            It is a clean, fast home for my work and writing — the same foundation this 3D experience builds upon.
+          </p>
+        </section>
+
+        <section>
+          <h3>Video Editing & Open Source</h3>
+          <p>
+            Beyond web projects, I produce cinematic video edits and motion graphics for my YouTube channel.
+            You can explore my code, review my style, and see my latest repositories on my official <a href="https://github.com/Manas96-afk" target="_blank" rel="noopener noreferrer">GitHub profile</a>,
+            or watch my edits on <a href="https://www.youtube.com/@cnomo_editz" target="_blank" rel="noopener noreferrer">YouTube (@cnomo_editz)</a>.
+          </p>
+        </section>
+      </article>
+
+      <article id="contact-room">
+        <header>
+          <h2>Let's Build Something: Contact Manas Bandhu</h2>
+        </header>
+        <section>
+          <h3>Freelance, Collaboration, and Creative Opportunities</h3>
+          <p>
+            Are you looking to hire a passionate video editor, a motion designer, or a web developer?
+            Manas Bandhu is always open to discussing new freelance projects, remote collaborations, and creative opportunities.
+            If your goal is a high-impact video edit, an award-worthy motion graphics piece, or a fast modern web application, I would love to hear from you.
+          </p>
+        </section>
+
+        <aside>
+          <h3>Connect with Manas Bandhu</h3>
+          <p>
+            Ready to start a conversation? You can find contact links hidden within the interactive 3D portfolio's Contact Room, or reach out through my networks right now.
+            Follow my journey on <a href="https://www.instagram.com/cnomo_editz" target="_blank" rel="noopener noreferrer">Instagram (@cnomo_editz)</a>,
+            watch my edits on <a href="https://www.youtube.com/@cnomo_editz" target="_blank" rel="noopener noreferrer">YouTube (@cnomo_editz)</a>,
+            or connect on <a href="https://www.linkedin.com/in/manasbandhu" target="_blank" rel="noopener noreferrer">LinkedIn</a>.
+          </p>
+        </aside>
+      </article>
+    </main>
+  </div>
+
+  <!-- Noscript strict fallback -->
+  <noscript>
+    Please enable JavaScript to experience the interactive 3D portfolio of Manas Bandhu (@cnomo_editz).
+  </noscript>
+
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
