@@ -172,7 +172,7 @@ const SegmentDoors = ({
                 rotation={[0, 0, 0.05]}
             >
                 <planeGeometry args={[1.2, 1.2 / 0.402]} />
-                <meshBasicMaterial color="#e0e0e0"
+                <meshBasicMaterial color={CORRIDOR_PALETTE.propMint}
                     map={ideaTexture}
                     transparent={true}
                     roughness={0.9}
@@ -194,7 +194,7 @@ const SegmentDoors = ({
                 rotation={[0, 0, -0.05]}
             >
                 <planeGeometry args={[2.2, 2.2 / 1.833]} />
-                <meshBasicMaterial color="#e0e0e0"
+                <meshBasicMaterial color={CORRIDOR_PALETTE.propPeach}
                     map={coffeeTexture}
                     transparent={true}
                     roughness={0.9}
@@ -210,7 +210,7 @@ const SegmentDoors = ({
             {/* Decoration Top (While True) */}
             <mesh position={[0, topWallCenterY, 0.07]}>
                 <planeGeometry args={[1.4, 1.4 / 1.833]} />
-                <meshBasicMaterial color="#e0e0e0"
+                <meshBasicMaterial color={CORRIDOR_PALETTE.propLavender}
                     map={whileTrueTexture}
                     transparent={true}
                     roughness={0.9}
@@ -222,7 +222,7 @@ const SegmentDoors = ({
             {/* Moved to Z = 0.09 to sit in front of baseboards (Z=0.07), hiding the hole edges */}
             <mesh position={[0, frameCenterY, 0.09]}>
                 <planeGeometry args={[frameWidth, frameHeight]} />
-                <meshBasicMaterial color="#e0e0e0"
+                <meshBasicMaterial color={CORRIDOR_PALETTE.propCream}
                     map={frameTexture}
                     transparent={true}
                     alphaTest={0.1}
@@ -236,13 +236,13 @@ const SegmentDoors = ({
                 {/* Solid 3D Door Body with edge texture */}
                 <mesh position={[doorWidth / 2, 0, 0.06]}>
                     <boxGeometry args={[doorWidth, doorHeight, 0.04]} />
-                    <meshBasicMaterial color="#e0e0e0" map={edgeTexture} roughness={0.9} />
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.door} map={edgeTexture} roughness={0.9} />
                 </mesh>
 
                 {/* Front Texture Face */}
                 <mesh position={[doorWidth / 2, 0, 0.09]}>
                     <planeGeometry args={[doorWidth, doorHeight]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.door}
                         map={doorLeftTexture}
                         transparent={true}
                         alphaTest={0.5}
@@ -253,7 +253,7 @@ const SegmentDoors = ({
                 {/* Back Texture Face (mirrored) */}
                 <mesh position={[doorWidth / 2, 0, 0.03]} rotation={[0, Math.PI, 0]} scale={[-1, 1, 1]}>
                     <planeGeometry args={[doorWidth, doorHeight]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.door}
                         map={doorBackTexture}
                         transparent={true}
                         alphaTest={0.5}
@@ -266,7 +266,7 @@ const SegmentDoors = ({
                 <group ref={leftHandleRef} position={[doorWidth / 2 + 0.357, -0.099, 0.10]}>
                     <mesh position={[-0.357, 0.099, 0]}>
                         <planeGeometry args={[doorWidth, doorHeight]} />
-                        <meshBasicMaterial color="#e0e0e0"
+                        <meshBasicMaterial color={CORRIDOR_PALETTE.door}
                             map={handleLeftTexture}
                             transparent={true}
                             alphaTest={0.5}
@@ -281,13 +281,13 @@ const SegmentDoors = ({
                 {/* Solid 3D Door Body with edge texture */}
                 <mesh position={[-doorWidth / 2, 0, 0.06]}>
                     <boxGeometry args={[doorWidth, doorHeight, 0.04]} />
-                    <meshBasicMaterial color="#e0e0e0" map={edgeTexture} roughness={0.9} />
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.door} map={edgeTexture} roughness={0.9} />
                 </mesh>
 
                 {/* Front Texture Face */}
                 <mesh position={[-doorWidth / 2, 0, 0.09]}>
                     <planeGeometry args={[doorWidth, doorHeight]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.door}
                         map={doorRightTexture}
                         transparent={true}
                         alphaTest={0.5}
@@ -298,7 +298,7 @@ const SegmentDoors = ({
                 {/* Back Texture Face */}
                 <mesh position={[-doorWidth / 2, 0, 0.03]} rotation={[0, Math.PI, 0]}>
                     <planeGeometry args={[doorWidth, doorHeight]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.door}
                         map={doorBackTexture}
                         transparent={true}
                         alphaTest={0.5}
@@ -310,7 +310,7 @@ const SegmentDoors = ({
                 <group ref={rightHandleRef} position={[-doorWidth / 2 - 0.357, -0.099, 0.10]}>
                     <mesh position={[0.357, 0.099, 0]}>
                         <planeGeometry args={[doorWidth, doorHeight]} />
-                        <meshBasicMaterial color="#e0e0e0"
+                        <meshBasicMaterial color={CORRIDOR_PALETTE.door}
                             map={handleRightTexture}
                             transparent={true}
                             alphaTest={0.5}
@@ -353,7 +353,7 @@ const SegmentDoors = ({
                         rotation={[-Math.PI / 2, 0, 0]}
                     >
                         <planeGeometry args={[THRESHOLD_WIDTH, THRESHOLD_DEPTH]} />
-                        <meshBasicMaterial color="#e0e0e0"
+                        <meshBasicMaterial color={CORRIDOR_PALETTE.threshold}
                             map={threshTex}
                             roughness={0.9}
                             metalness={0}
@@ -373,7 +373,7 @@ const SegmentDoors = ({
                 return (
                     <mesh position={[-(doorOpeningWidth / 2 + sideWallWidth / 2), floorY + 0.075, wallThickness / 2 + 0.01]}>
                         <planeGeometry args={[sideWallWidth, 0.15]} />
-                        <meshBasicMaterial color="#e0e0e0" map={bbTex} roughness={0.8} side={THREE.DoubleSide} />
+                        <meshBasicMaterial color={CORRIDOR_PALETTE.baseboard} map={bbTex} roughness={0.8} side={THREE.DoubleSide} />
                     </mesh>
                 );
             })()}
@@ -389,7 +389,7 @@ const SegmentDoors = ({
                 return (
                     <mesh position={[(doorOpeningWidth / 2 + sideWallWidth / 2), floorY + 0.075, wallThickness / 2 + 0.01]}>
                         <planeGeometry args={[sideWallWidth, 0.15]} />
-                        <meshBasicMaterial color="#e0e0e0" map={bbTex} roughness={0.8} side={THREE.DoubleSide} />
+                        <meshBasicMaterial color={CORRIDOR_PALETTE.baseboard} map={bbTex} roughness={0.8} side={THREE.DoubleSide} />
                     </mesh>
                 );
             })()}

@@ -972,7 +972,7 @@ const DoorSection = ({
                     scale={[0.5, 0.5, 1]}
                 >
                     <planeGeometry args={[1, 0.5]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propPink}
                         map={arrowTexture}
                         transparent={true}
                         alphaTest={0.1}
@@ -995,7 +995,7 @@ const DoorSection = ({
                     scale={[-0.5, 0.5, 1]}
                 >
                     <planeGeometry args={[1, 0.5]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propPink}
                         map={arrowTexture}
                         transparent={true}
                         alphaTest={0.1}
@@ -1064,7 +1064,7 @@ const DoorSection = ({
                         <mesh>
                             {/* Adjusted size for the signs - assuming rectangular aspect ratio */}
                             <planeGeometry args={[1.3, 0.65]} />
-                            <meshBasicMaterial color="#e0e0e0"
+                            <meshBasicMaterial color={CORRIDOR_PALETTE.propMint}
                                 map={signTexture}
                                 transparent={true}
                                 alphaTest={0.1}
@@ -1175,7 +1175,7 @@ const DoorSection = ({
                     {/* Moved to Z = 0.04 to sit in front of baseboards (Z=0.02), hiding the hole edges */}
                     <mesh position={[0, -0.1, 0.04]} scale={[side === 'right' ? -1 : 1, 1, 1]}>
                         <planeGeometry args={[frameWidth, frameHeight]} />
-                        <meshBasicMaterial color="#e0e0e0"
+                        <meshBasicMaterial color={CORRIDOR_PALETTE.propCream}
                             map={frameTexture}
                             transparent={true}
                             alphaTest={0.1}
@@ -1227,7 +1227,7 @@ const DoorSection = ({
                             scale={[(side === 'right' && label !== 'EDITED VIDEOS') ? -1 : 1, 1, 1]}
                         >
                             <planeGeometry args={[doorWidth, doorHeight]} />
-                            <revealMaterial color="#e0e0e0"
+                            <revealMaterial color={CORRIDOR_PALETTE.door}
                                 ref={doorMaterialRef}
                                 map={doorTexture}
                                 transparent={true}
@@ -1244,7 +1244,7 @@ const DoorSection = ({
                             scale={[side === 'right' ? -1 : 1, 1, 1]}
                         >
                             <planeGeometry args={[doorWidth, doorHeight]} />
-                            <meshBasicMaterial color="#e0e0e0"
+                            <meshBasicMaterial color={CORRIDOR_PALETTE.door}
                                 map={doorBackTexture}
                                 transparent={true}
                                 alphaTest={0.1}
@@ -1268,7 +1268,7 @@ const DoorSection = ({
                             {/* Sketch handle overlay (front) */}
                             <mesh position={[side === 'left' ? -0.50 : 0.50, 0.14, 0]} scale={[side === 'right' ? -1 : 1, 1, 1]}>
                                 <planeGeometry args={[doorWidth, doorHeight]} />
-                                <revealMaterial color="#e0e0e0"
+                                <revealMaterial color={CORRIDOR_PALETTE.door}
                                     ref={handleMaterialRef}
                                     map={handleTexture}
                                     transparent={true}

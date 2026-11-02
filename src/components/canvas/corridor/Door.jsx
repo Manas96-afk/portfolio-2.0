@@ -7,6 +7,7 @@ import { PositionalAudio } from '@react-three/drei';
 import '../shaders/RevealMaterial'; // Registers alpha-discard reveal shader
 import { useAudio } from '../../../../context/AudioManager';
 import { isTouchDevice } from '../../../../utils/deviceDetect';
+import { CORRIDOR_PALETTE } from '../../../config/corridorPalette';
 
 // Global settings for entrance doors audio
 const ENTRANCE_DOOR_AUDIO_SETTINGS = {
@@ -175,7 +176,7 @@ const Door = ({
                 {/* Label background (middle layer) */}
                 <mesh position={[0, 0, -0.01]}>
                     <planeGeometry args={[label.length * 0.08 + 0.3, 0.25]} />
-                    <meshBasicMaterial color="#e0e0e0" />
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propMint} />
                 </mesh>
 
                 {/* Label text (front layer) */}

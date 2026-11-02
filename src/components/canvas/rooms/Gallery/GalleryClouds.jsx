@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { useLoader, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { CORRIDOR_PALETTE } from '../../../../config/corridorPalette';
 
 // Available cloud textures
 const CLOUD_TEXTURES = [
@@ -124,7 +125,7 @@ const StaticCloud = ({ position, scale, opacity, textureIndex, driftSpeed, initi
     return (
         <mesh ref={meshRef} position={position}>
             <planeGeometry args={[width, height]} />
-            <meshBasicMaterial color="#e0e0e0"
+            <meshBasicMaterial color={CORRIDOR_PALETTE.propCream}
                 map={texture}
                 transparent
                 opacity={opacity}

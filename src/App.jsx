@@ -179,7 +179,7 @@ function AppContent() {
               shadows={settings.shadows}
             >
               <color attach="background" args={[CORRIDOR_PALETTE.atmosphere]} />
-              <fog attach="fog" args={[CORRIDOR_PALETTE.atmosphere, 15, 50]} />
+              <fog attach="fog" args={[CORRIDOR_PALETTE.fog, 15, 50]} />
 
               {/* Scale performance down if fps drops */}
               <PerformanceMonitor

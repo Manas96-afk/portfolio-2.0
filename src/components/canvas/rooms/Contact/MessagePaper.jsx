@@ -3,6 +3,7 @@ import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text, useTexture, Html, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
+import { CORRIDOR_PALETTE } from '../../../../config/corridorPalette';
 
 const PAPER_WIDTH = 1.51; // Legacy ratio 1197/1340
 const PAPER_HEIGHT = 1.7;
@@ -122,7 +123,7 @@ const SmoothButton = ({ texture, onClick, position, size, text, fontPath }) => {
         >
             <mesh rotation={[-Math.PI / 2, 0, 0]}>
                 <planeGeometry args={size} />
-                <meshBasicMaterial color="#e0e0e0"
+                <meshBasicMaterial color={CORRIDOR_PALETTE.propMint}
                     map={texture}
                     transparent
                     alphaTest={0.1}
@@ -573,7 +574,7 @@ const MessagePaper = ({ position = [0, 0.05, 2], onSend }) => {
             {/* Main Paper Mesh - FRONT (with texture) */}
             <mesh ref={paperRef} rotation={[-Math.PI / 2, 0, 0]} onClick={handlePaperClick}>
                 <planeGeometry args={[PAPER_WIDTH, PAPER_HEIGHT, 20, 20]} />
-                <meshBasicMaterial color="#e0e0e0"
+                <meshBasicMaterial color={CORRIDOR_PALETTE.propCream}
                     map={paperTexture}
                     transparent
                     alphaTest={0.5}

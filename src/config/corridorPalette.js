@@ -10,15 +10,26 @@
 export const CORRIDOR_PALETTE = {
     // Surfaces
     floor: '#f3e2c3',        // warm cream wood planks
-    wall: '#dfeaf2',         // soft sky-blue paper walls
-    wallDoor: '#d9e7ee',     // slightly deeper blue around doors (reads as depth)
-    ceiling: '#eef4f8',      // very light sky ceiling
-    baseboard: '#f2c9a4',    // peach trim — the corridor's accent color
-    threshold: '#f2c9a4',    // matches baseboards at doorways
+    wall: '#e3e9fa',         // soft periwinkle paper walls (pastel, distinct from sky)
+    wallDoor: '#d8e0f6',     // deeper periwinkle around doors (reads as depth)
+    ceiling: '#f4f5fd',      // lavender-white ceiling
+    baseboard: '#f7c9a8',    // peach trim — the corridor's accent color
+    threshold: '#f7c9a8',    // matches baseboards at doorways
 
-    // Paper props (doodles, signs, decorations) keep their white paper look
-    // so they pop against the tinted walls.
+    // Paper props (doodles, signs, decorations) get pastel tints from the
+    // accents below so the whole corridor reads as a soft pastel mix.
 
-    // Atmosphere (background + fog in App.jsx) = the sky
-    atmosphere: '#87CEEB',   // sky blue — visible as sky behind/above everything
+    // Atmosphere (background in App.jsx) = the sky
+    atmosphere: '#bfe4f7',   // light sky blue — pale, not saturated
+    // Fog (App.jsx) is deliberately SEPARATE from the sky: a warm paper haze
+    // so the corridor fades to cream in the distance instead of blue haze.
+    fog: '#f8f4ec',
+
+    // Pastel accents for doors / props / paper items
+    door: '#f9ddc6',         // peach doors
+    propPeach: '#f9ddc6',    // warm props (table, coffee)
+    propMint: '#d8f2e7',     // fresh mint props
+    propLavender: '#e7e3fa', // lilac props
+    propPink: '#fadfeb',     // soft pink props
+    propCream: '#f8f1e4',    // warm paper — lamps, signs, entrance walls
 };

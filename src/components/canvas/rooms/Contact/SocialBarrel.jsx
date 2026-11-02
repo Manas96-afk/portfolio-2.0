@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import '../../shaders/RevealMaterial';
 import { isTouchDevice } from '../../../../utils/deviceDetect';
+import { CORRIDOR_PALETTE } from '../../../../config/corridorPalette';
 
 // Reusable Vector3 to avoid allocations in useFrame
 const _tempScale = new THREE.Vector3();
@@ -127,7 +128,7 @@ const SocialBarrel = ({ position, rotation = [0, 0, 0], texturePath, label, onCl
             {/* Sketch overlay (Front) - brush-stroke discard reveals painted beneath */}
             <mesh position={[0, 0, 0]}>
                 <planeGeometry args={scale} />
-                <revealMaterial color="#e0e0e0"
+                <revealMaterial color={CORRIDOR_PALETTE.propPeach}
                     ref={materialRef}
                     map={texture}
                     transparent={true}
