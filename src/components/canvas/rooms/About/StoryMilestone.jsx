@@ -2,6 +2,7 @@ import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
+import { CORRIDOR_PALETTE } from '../../../../config/corridorPalette';
 
 // Reusable Vector3 to avoid allocations in useFrame
 const _worldPos = new THREE.Vector3();
@@ -108,7 +109,7 @@ const StoryMilestone = ({
                     titleColor: '#1a1a1a',
                     subtitleSize: 0.4,
                     subtitleColor: '#4a4a4a',
-                    decorColor: '#e0e0e0'
+                    decorColor: CORRIDOR_PALETTE.propLavender
                 };
             case 'awards':
                 return {
@@ -140,7 +141,7 @@ const StoryMilestone = ({
                     titleColor: '#2a2a2a',
                     subtitleSize: 0.35,
                     subtitleColor: '#666666',
-                    decorColor: '#e0e0e0'
+                    decorColor: CORRIDOR_PALETTE.propMint
                 };
         }
     }, [type]);

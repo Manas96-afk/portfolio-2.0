@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { usePerformance } from '../../../context/PerformanceContext';
+import { CORRIDOR_PALETTE } from '../../../config/corridorPalette';
 
 /**
  * Doodles Component - Hand-drawn Sketch Elements
@@ -156,7 +157,7 @@ const SketchElement = ({
             {/* Shadow layer */}
             <mesh position={[0.01, -0.01, -0.01]}>
                 <planeGeometry args={[dimensions.width, dimensions.height]} />
-                <meshBasicMaterial color="#e0e0e0"
+                <meshBasicMaterial color={CORRIDOR_PALETTE.propLavender}
                     map={texture}
                     transparent={true}
                     opacity={0.15}
@@ -168,7 +169,7 @@ const SketchElement = ({
             {/* Main element */}
             <mesh>
                 <planeGeometry args={[dimensions.width, dimensions.height]} />
-                <meshBasicMaterial color="#e0e0e0"
+                <meshBasicMaterial color={CORRIDOR_PALETTE.propLavender}
                     map={texture}
                     transparent={true}
                     side={THREE.DoubleSide}

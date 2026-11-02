@@ -9,6 +9,7 @@ import '../../shaders/RevealBasicMaterial'; // Registers brush-stroke reveal for
 import { isTouchDevice } from '../../../../utils/deviceDetect';
 import { useAwards } from '../../../../hooks/useData';
 import { AWARDS as AWARDS_DATA } from '../../../../data/content';
+import { CORRIDOR_PALETTE } from '../../../../config/corridorPalette';
 
 // Reusable Vector3 to avoid allocations in event handlers
 const _tempVec3 = new THREE.Vector3();
@@ -863,7 +864,7 @@ const JourneyMilestone = ({ z, scrollProgressRef }) => {
             <group ref={uoRef} position={[-3.5, -1, 0]}>
                 <mesh>
                     <planeGeometry args={[islandHeight * uoAspect, islandHeight]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propMint}
                         map={uoTexture}
                         transparent
                         side={THREE.DoubleSide}
@@ -886,7 +887,7 @@ const JourneyMilestone = ({ z, scrollProgressRef }) => {
             <group ref={freelanceRef} position={[3.5, -2, 0.5]}>
                 <mesh>
                     <planeGeometry args={[islandHeight * freelanceAspect, islandHeight]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propPeach}
                         map={freelanceTexture}
                         transparent
                         side={THREE.DoubleSide}

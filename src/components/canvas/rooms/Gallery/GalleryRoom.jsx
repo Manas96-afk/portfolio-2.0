@@ -14,6 +14,7 @@ import { useAudio } from '../../../../context/AudioManager';
 import { usePaintMaterial } from './usePaintMaterial';
 import { useGalleryProjects } from '../../../../hooks/useData';
 import { GALLERY_PROJECTS } from '../../../../data/content';
+import { CORRIDOR_PALETTE } from '../../../../config/corridorPalette';
 
 // Reusable Vector3 to avoid allocations in useFrame
 const _tempScale = new THREE.Vector3();
@@ -347,7 +348,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     const materials = useMemo(() => {
         const floorMat = new THREE.MeshBasicMaterial({
             map: floorTexture,
-            color: '#e0e0e0',
+            color: CORRIDOR_PALETTE.floor,
             side: THREE.DoubleSide
         });
         floorMat.onBeforeCompile = onBeforeCompile;
@@ -360,7 +361,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
         ropeMat.needsUpdate = true;
 
         const thresholdMat = new THREE.MeshBasicMaterial({
-            color: '#e0e0e0',
+            color: CORRIDOR_PALETTE.threshold,
             map: (() => {
                 const t = new THREE.TextureLoader().load('/textures/corridor/texturadoprogow.webp');
                 t.colorSpace = THREE.SRGBColorSpace;
@@ -445,7 +446,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 {/* Railing */}
                 <mesh position={[0, RAILING_HEIGHT / 2, -3.9]}>
                     <planeGeometry args={[20, RAILING_HEIGHT]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propCream}
                         map={railingTexture}
                         transparent={true}
                         side={THREE.DoubleSide}
@@ -495,7 +496,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 {/* Houses - center */}
                 <mesh position={[0, -1, -9]} scale={[1, 1, 1]}>
                     <planeGeometry args={[15, 15 / 2.357]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propPeach}
                         map={housesTexture}
                         transparent={true}
                         alphaTest={0.1}
@@ -506,7 +507,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 {/* Houses - left side (mirrored) */}
                 <mesh position={[-15, -1, -9]} scale={[-1, 1, 1]}>
                     <planeGeometry args={[15, 15 / 2.357]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propPeach}
                         map={housesTexture}
                         transparent={true}
                         alphaTest={0.1}
@@ -525,7 +526,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 {/* City skyline - center */}
                 <mesh position={[0, 3.4, -17]} scale={[1, 1, 1]}>
                     <planeGeometry args={[30, 30 / 2.357]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propLavender}
                         map={cityTexture}
                         transparent={true}
                         alphaTest={0.1}
@@ -536,7 +537,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 {/* City skyline - left (mirrored) */}
                 <mesh position={[-30, 3.4, -17]} scale={[-1, 1, 1]}>
                     <planeGeometry args={[30, 30 / 2.357]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propLavender}
                         map={cityTexture}
                         transparent={true}
                         alphaTest={0.1}
@@ -547,7 +548,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 {/* City skyline - right (mirrored) */}
                 <mesh position={[30, 3.4, -17]} scale={[-1, 1, 1]}>
                     <planeGeometry args={[30, 30 / 2.357]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propLavender}
                         map={cityTexture}
                         transparent={true}
                         alphaTest={0.1}
@@ -565,7 +566,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 {/* Skybox/Environment */}
                 <mesh position={[0, 5, -20]}>
                     <sphereGeometry args={[40, 32, 32]} />
-                    <meshBasicMaterial color="#87CEEB" side={THREE.BackSide} transparent opacity={0.5} onBeforeCompile={onBeforeCompile} />
+                    <meshBasicMaterial color="#bfe4f7" side={THREE.BackSide} transparent opacity={0.5} onBeforeCompile={onBeforeCompile} />
                 </mesh>
             </group>
         </group>
@@ -639,7 +640,7 @@ const FlyingBird = ({ texture }) => {
     return (
         <mesh ref={birdRef} position={[startX, 4.5, -10]} scale={[BIRD_WIDTH, BIRD_HEIGHT, 1]}>
             <planeGeometry args={[1.5, 1.5]} />
-            <meshBasicMaterial color="#e0e0e0"
+            <meshBasicMaterial color={CORRIDOR_PALETTE.propPink}
                 map={texture}
                 transparent={true}
                 alphaTest={0.1}
@@ -1301,7 +1302,7 @@ const RightSideHouses = ({ texture, baseWidth, baseHeight, cropAmount }) => {
     return (
         <mesh position={[newX, -1, -9]} scale={[-1, 1, 1]}>
             <planeGeometry args={[newWidth, baseHeight]} />
-            <meshBasicMaterial color="#e0e0e0"
+            <meshBasicMaterial color={CORRIDOR_PALETTE.propPeach}
                 map={croppedTexture}
                 transparent={true}
                 alphaTest={0.1}

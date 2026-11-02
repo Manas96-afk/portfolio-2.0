@@ -2,6 +2,7 @@ import { useRef, useMemo } from 'react';
 import { useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { CORRIDOR_PALETTE } from '../../../config/corridorPalette';
 
 const SignSystem = (props) => {
     const groupRef = useRef();
@@ -29,7 +30,7 @@ const SignSystem = (props) => {
             {/* No rotation needed as the texture is already horizontal */}
             <mesh position={[-0.05, 2.05, 0.65]}>
                 <planeGeometry args={[2.7, 0.4]} />
-                <meshBasicMaterial color="#e0e0e0" map={mountTexture} transparent={true} side={THREE.DoubleSide} />
+                <meshBasicMaterial color={CORRIDOR_PALETTE.propLavender} map={mountTexture} transparent={true} side={THREE.DoubleSide} />
             </mesh>
 
             {/* 2. THE SIGN (SignGroup) */}
@@ -45,7 +46,7 @@ const SignSystem = (props) => {
                 >
                     {/* Width 2.6 (Narrower), Height 1 */}
                     <planeGeometry args={[2, 1]} />
-                    <meshBasicMaterial color="#e0e0e0"
+                    <meshBasicMaterial color={CORRIDOR_PALETTE.propCream}
                         map={signTexture}
                         transparent={true}
                         side={THREE.DoubleSide}

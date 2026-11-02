@@ -8,6 +8,7 @@ import { useScene } from '../../../../context/SceneContext';
 import { useAchievements } from '../../../../context/AchievementsContext';
 import { TextureLoader } from 'three';
 import FloatingCodeParticles from './FloatingCodeParticles';
+import { CORRIDOR_PALETTE } from '../../../../config/corridorPalette';
 import { PositionalAudio } from '@react-three/drei';
 import { useAudio } from '../../../../context/AudioManager';
 import { useStudioContent } from '../../../../hooks/useData';
@@ -748,7 +749,7 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
         if (!faceConfig) return null;
         return faceConfig.map(f => {
             const mat = new THREE.MeshBasicMaterial({
-                color: f.isFront ? '#ffffff' : '#e0e0e0', // photo face at full brightness
+                color: f.isFront ? '#ffffff' : CORRIDOR_PALETTE.propLavender, // photo face at full brightness
                 map: f.painted || f.sketch // Use sketch as fallback if no painted version
             });
             // Apply paint transition shader
@@ -767,7 +768,7 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
         if (!faceConfig) return null;
         return faceConfig.map(f => {
             if (f.painted) return null; // Will use revealMaterial instead
-            const mat = new THREE.MeshBasicMaterial({ color: f.isFront ? '#ffffff' : '#e0e0e0', map: f.sketch });
+            const mat = new THREE.MeshBasicMaterial({ color: f.isFront ? '#ffffff' : CORRIDOR_PALETTE.propLavender, map: f.sketch });
             // Apply paint transition shader
             if (paintOnBeforeCompile) {
                 mat.onBeforeCompile = paintOnBeforeCompile;
@@ -870,7 +871,7 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
                     if (face.painted) {
                         // This face has a painted version → use revealMaterial for brush-stroke discard
                         return (
-                            <revealMaterial color={face.isFront ? '#ffffff' : '#e0e0e0'}
+                            <revealMaterial color={face.isFront ? '#ffffff' : CORRIDOR_PALETTE.propLavender}
                                 key={`s${i}`}
                                 ref={matRefs[i]}
                                 attach={`material-${i}`}

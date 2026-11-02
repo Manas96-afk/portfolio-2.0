@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { useFrame, useThree, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
+import { CORRIDOR_PALETTE } from '../../../../config/corridorPalette';
 
 /**
  * SkyChunk Component
@@ -175,7 +176,7 @@ const Cloud = ({
     return (
         <mesh ref={meshRef} position={position}>
             <planeGeometry args={[width, height]} />
-            <meshBasicMaterial color="#e0e0e0"
+            <meshBasicMaterial color={CORRIDOR_PALETTE.propCream}
                 ref={materialRef}
                 map={texture}
                 transparent
