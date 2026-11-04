@@ -39,8 +39,29 @@ export const GALLERY_INTERACTION_AUDIO_SETTINGS = {
 // Mirrors the structure in src/data/content.js (see GALLERY_PROJECTS there).
 const FALLBACK_PROJECTS = GALLERY_PROJECTS;
 
-const PROJECT_COUNT = 10; // Keep the count for the infinite scroll feel
+// PROJECT_COUNT = number of unique projects (no forced duplicates).
+// The loop feels infinite because the shuffled array wraps seamlessly.
 const GAP = 2.5;
+
+// Seeded random for consistent shuffle across sessions
+function seededRandom(seed) {
+    let s = seed;
+    return function () {
+        s = Math.sin(s * 9999) * 10000;
+        return s - Math.floor(s);
+    };
+}
+
+// Fisher-Yates shuffle with seeded random
+function shuffleArray(array, seed = 42) {
+    const arr = [...array];
+    const rand = seededRandom(seed);
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
 
 // Zmień te wartości aby dopasować proporcje ptaka (legacy ratio 1.41)
 const BIRD_WIDTH = 0.49;
@@ -212,20 +233,22 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     
     useTexture(allLogos);
 
-    // Construct the full list of projects (repeated) with textures attached
+    // Construct the full list of projects (shuffled once per session, no duplicates)
     const projects = useMemo(() => {
-        return Array.from({ length: PROJECT_COUNT }).map((_, i) => {
-            const projectIndex = i % activeProjects.length;
-            const projectData = activeProjects[projectIndex];
+        // Shuffle once for random order, stable per session
+        const shuffledProjects = shuffleArray(activeProjects, 12345);
+        const projectCount = shuffledProjects.length;
+
+        return Array.from({ length: projectCount }).map((_, i) => {
+            const projectData = shuffledProjects[i];
 
             // Extract front texture
-            const frontTex = projectTextures[projectIndex];
-            const paintedTex = paintedTextures[projectIndex];
+            const frontTex = projectTextures[i];
+            const paintedTex = paintedTextures[i];
 
             // Configure textures
             if (frontTex) {
                 frontTex.colorSpace = THREE.SRGBColorSpace;
-                // frontTex.encoding = THREE.sRGBEncoding;
             }
             if (paintedTex) {
                 paintedTex.colorSpace = THREE.SRGBColorSpace;
@@ -255,11 +278,12 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 techStack: techStack
             };
         });
-    }, [projectTextures, backTextureRaw, overlayTextureRaw]);
+    }, [projectTextures, paintedTextures, backTextureRaw, overlayTextureRaw, activeProjects, canHover]);
 
     // Function to scroll to a specific project index
     const scrollToIndex = (index, onComplete) => {
-        const totalWidth = PROJECT_COUNT * GAP;
+        const projectCount = projects.length;
+        const totalWidth = projectCount * GAP;
         const targetScrollValue = index * GAP;
         const currentScrollValue = currentScroll.current;
 
@@ -477,7 +501,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                             ref={el => cardRefs.current[i] = el}
                             project={project}
                             clothespinTexture={clothespinTexture}
-                            total={PROJECT_COUNT}
+                            total={projects.length}
                             currentScroll={currentScroll}
                             materials={materials}
                             curve={curve}
@@ -1016,7 +1040,7 @@ const ProjectCard = memo(forwardRef(({ index, project, clothespinTexture, curren
         // Skip position updates ONLY during flip animation, NOT during scroll
         if (isAnimating || isSelected) return;
 
-        const totalWidth = PROJECT_COUNT * GAP; // GAP is available in scope because we are in the file where GAP is defined
+        const totalWidth = projects.length * GAP; // GAP is available in scope because we are in the file where GAP is defined
         let rawX = (index * GAP) - currentScroll.current;
         const halfWidth = totalWidth / 2;
         let displayX = ((rawX + halfWidth) % totalWidth + totalWidth) % totalWidth - halfWidth;
