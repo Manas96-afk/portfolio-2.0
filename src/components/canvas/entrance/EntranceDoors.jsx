@@ -40,7 +40,8 @@ const EntranceDoors = ({
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
-    const [isWindowHovered, setIsWindowHovered] = useState(false);
+    // Window hover flag (ref = fresh inside useFrame, no re-render needed)
+    const isWindowHoveredRef = useRef(false);
     const windowAvatarRef = useRef();
     const { camera } = useThree();
     const { unlockAchievement } = useAchievements();
@@ -515,51 +516,38 @@ const EntranceDoors = ({
             // Random rotation jitter
             bugRef.current.rotation.z = Math.sin(time * 5) * 0.1 + Math.atan2(yOffset, xOffset) * 0.2;
         }
+
+        // --- Window Avatar: idle sway + hover wave ---
+        if (windowAvatarRef.current) {
+            const t = clock.elapsedTime;
+            const hovered = isWindowHoveredRef.current;
+
+            // Idle: gentle bob + slow sway so the figure feels alive
+            // Hover: livelier bounce + faster wiggle = waving hello
+            const bobAmp = hovered ? 0.05 : 0.02;
+            const bobSpeed = hovered ? 5 : 1.6;
+            const swayAmp = hovered ? 0.14 : 0.05;
+            const swaySpeed = hovered ? 7 : 1.9;
+
+            windowAvatarRef.current.position.y = Math.sin(t * bobSpeed) * bobAmp;
+            windowAvatarRef.current.rotation.z = Math.sin(t * swaySpeed) * swayAmp;
+        }
     });
 
 
 
-    // Helper for window hover
+    // Helper for window hover — the avatar itself is animated in useFrame
+    // (idle sway at rest, lively wave on hover), so only state/cursor here.
     const handleWindowEnter = (e) => {
         e.stopPropagation();
-        setIsWindowHovered(true);
+        isWindowHoveredRef.current = true;
         document.body.style.cursor = "pointer";
-
-        if (windowAvatarRef.current) {
-            gsap.to(windowAvatarRef.current.position, {
-                x: 2.5,
-                duration: 0.5,
-                ease: 'back.out(1.7)',
-                overwrite: true
-            });
-            gsap.to(windowAvatarRef.current.rotation, {
-                z: 0.1,
-                duration: 0.5,
-                ease: 'power2.out',
-                overwrite: true
-            });
-        }
     };
 
     const handleWindowLeave = (e) => {
         e.stopPropagation();
-        setIsWindowHovered(false);
+        isWindowHoveredRef.current = false;
         document.body.style.cursor = "auto";
-
-        if (windowAvatarRef.current) {
-            gsap.to(windowAvatarRef.current.position, {
-                x: 3.5,
-                duration: 0.4,
-                ease: 'power2.in',
-                overwrite: true
-            });
-            gsap.to(windowAvatarRef.current.rotation, {
-                z: 0,
-                duration: 0.4,
-                ease: 'power2.in',
-                overwrite: true
-            });
-        }
     };
 
     // Frame center Y - aligned with doors
@@ -805,10 +793,13 @@ const EntranceDoors = ({
                 color="#fff8e8"
                 distance={10}
             /> */}
-            {/* AVATAR - separate from window group, behind bricks */}
+            {/* AVATAR - separate from window group, behind bricks.
+                Rest x=2.5 keeps the figure inside the bricks window hole
+                (world x 1.75-3.25) so it's always visible; the window
+                hover only triggers the wave animation now. */}
             <mesh
                 ref={windowAvatarRef}
-                position={[3.5, 0, 0.04]}
+                position={[2.5, 0, 0.04]}
                 rotation={[0, 0, 0]}
             >
                 <planeGeometry args={[1.5, 1.5]} />
