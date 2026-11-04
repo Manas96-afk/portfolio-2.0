@@ -42,6 +42,7 @@ const EntranceDoors = ({
     const [isAnimating, setIsAnimating] = useState(false);
     const [isWindowHovered, setIsWindowHovered] = useState(false);
     const windowAvatarRef = useRef();
+    const windowAvatarWaveRef = useRef(0); // Smoothed 0..1 hover factor for avatar wave
     const { camera } = useThree();
     const { unlockAchievement } = useAchievements();
 
@@ -499,6 +500,26 @@ const EntranceDoors = ({
             mousePivotRef.current.rotation.x = Math.sin(clock.elapsedTime * 1.5) * 0.05;
         }
 
+        // --- Window Avatar Animation ---
+        // Idle: gentle bob + slow sway. Hover: faster wiggle + bounce (waving).
+        if (windowAvatarRef.current) {
+            // Smoothly blend the hover factor so the wave eases in/out
+            const target = isWindowHovered ? 1 : 0;
+            windowAvatarWaveRef.current = THREE.MathUtils.lerp(
+                windowAvatarWaveRef.current,
+                target,
+                0.08
+            );
+            const w = windowAvatarWaveRef.current;
+            const t = clock.elapsedTime;
+
+            windowAvatarRef.current.position.y = Math.sin(t * 2.2) * (0.02 + 0.03 * w);
+            windowAvatarRef.current.rotation.z =
+                Math.sin(t * 2.0) * 0.05 +   // slow sway (always)
+                Math.sin(t * 7.0) * 0.14 * w + // fast wiggle (hover)
+                0.1 * w;                        // lean/tilt while waving
+        }
+
         // --- Bug Animation ---
         if (bugRef.current) {
             const time = clock.elapsedTime;
@@ -524,42 +545,12 @@ const EntranceDoors = ({
         e.stopPropagation();
         setIsWindowHovered(true);
         document.body.style.cursor = "pointer";
-
-        if (windowAvatarRef.current) {
-            gsap.to(windowAvatarRef.current.position, {
-                x: 2.5,
-                duration: 0.5,
-                ease: 'back.out(1.7)',
-                overwrite: true
-            });
-            gsap.to(windowAvatarRef.current.rotation, {
-                z: 0.1,
-                duration: 0.5,
-                ease: 'power2.out',
-                overwrite: true
-            });
-        }
     };
 
     const handleWindowLeave = (e) => {
         e.stopPropagation();
         setIsWindowHovered(false);
         document.body.style.cursor = "auto";
-
-        if (windowAvatarRef.current) {
-            gsap.to(windowAvatarRef.current.position, {
-                x: 3.5,
-                duration: 0.4,
-                ease: 'power2.in',
-                overwrite: true
-            });
-            gsap.to(windowAvatarRef.current.rotation, {
-                z: 0,
-                duration: 0.4,
-                ease: 'power2.in',
-                overwrite: true
-            });
-        }
     };
 
     // Frame center Y - aligned with doors
@@ -806,9 +797,10 @@ const EntranceDoors = ({
                 distance={10}
             /> */}
             {/* AVATAR - separate from window group, behind bricks */}
+            {/* Rest position x = 2.5 (always visible in window); animated in useFrame */}
             <mesh
                 ref={windowAvatarRef}
-                position={[3.5, 0, 0.04]}
+                position={[2.5, 0, 0.04]}
                 rotation={[0, 0, 0]}
             >
                 <planeGeometry args={[1.5, 1.5]} />
