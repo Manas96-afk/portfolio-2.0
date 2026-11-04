@@ -10,29 +10,31 @@ import * as THREE from 'three';
  * - Parallax depth effect on scroll
  * - Hand-drawn line style matching entrance
  * - Dodges when camera approaches
- * - Frame-by-frame animation: choreographed wave
- *   (rest -> build-up -> double wave-bounce -> back to rest)
+ * - Choreographed wave animation on transforms
+ *   (rest -> build-up lean -> double wave-bounce -> back to rest)
+ *
+ * Single texture (avatar_corridor.webp) laid out on the same 1024x1024
+ * canvas as the old frame sequence, so plane size/feet position match.
  */
-// Choreography: build-up (rest -> raise), double wave-bounce with holds,
-// then lower back to rest. Per-step duration in seconds.
-// f = frame index (0-6 -> 1.webp-7.webp), d = duration in seconds
+// Choreography: build-up (lean back), double wave-bounce with holds,
+// then settle back to rest. Per-step duration in seconds.
+// r = body rotation.z (radians), y = hop offset (units), d = duration.
 const SEQUENCE = [
-    { f: 0, d: 0.95 }, // rest: hand in pocket, noticing the visitor
-    { f: 1, d: 0.15 }, // fast build-up
-    { f: 2, d: 0.15 },
-    { f: 3, d: 0.17 }, // arm reaching up (small hold)
-    { f: 4, d: 0.12 }, // wave: up
-    { f: 5, d: 0.10 }, // mid
-    { f: 6, d: 0.15 }, // high peak (hold)
-    { f: 5, d: 0.10 },
-    { f: 4, d: 0.12 },
-    { f: 5, d: 0.10 }, // second bounce
-    { f: 6, d: 0.20 }, // high peak (longer hold)
-    { f: 5, d: 0.10 },
-    { f: 4, d: 0.13 },
-    { f: 3, d: 0.13 }, // lowering back down
-    { f: 2, d: 0.13 },
-    { f: 1, d: 0.14 },
+    { r: 0.00, y: 0.000, d: 0.95 }, // rest: noticing the visitor
+    { r: -0.10, y: 0.000, d: 0.15 }, // fast build-up: lean back
+    { r: -0.14, y: 0.020, d: 0.15 },
+    { r: 0.06, y: 0.080, d: 0.17 }, // launch up (small hold)
+    { r: 0.16, y: 0.040, d: 0.12 }, // wave: up
+    { r: -0.02, y: 0.080, d: 0.10 }, // mid
+    { r: 0.18, y: 0.050, d: 0.15 }, // high peak (hold)
+    { r: -0.02, y: 0.080, d: 0.10 },
+    { r: 0.16, y: 0.040, d: 0.12 }, // second bounce
+    { r: 0.18, y: 0.060, d: 0.20 }, // high peak (longer hold)
+    { r: -0.02, y: 0.080, d: 0.10 },
+    { r: 0.16, y: 0.040, d: 0.13 },
+    { r: 0.05, y: 0.020, d: 0.13 }, // lowering back down
+    { r: -0.04, y: 0.000, d: 0.13 },
+    { r: 0.00, y: 0.000, d: 0.14 }, // settle to rest
 ];
 
 const Avatar = ({ position = [10, -20, 30] }) => {
@@ -46,39 +48,28 @@ const Avatar = ({ position = [10, -20, 30] }) => {
     const targetDodgeX = useRef(0);
     const worldPosVec = useRef(new THREE.Vector3());
 
-    // --- FRAME-BY-FRAME ANIMATION (CHOREOGRAPHED SEQUENCE) ---
-    // 7 poses: 1=hand-in-pocket(rest) 2=hand at chest 3=arm extended
-    //          4=hand-to-face(raise) 5=wave-up 6=wave-mid 7=wave-high
-    const TOTAL_FRAMES = 7;
-    const framePaths = Array.from({ length: TOTAL_FRAMES }, (_, i) => `/textures/corridor/avatar_anim/${i + 1}.webp`);
+    // Single waving-figure texture (replaces the old 7-frame sequence)
+    const texture = useTexture('/textures/corridor/avatar_corridor.webp');
 
-    // Load all texture frames
-    const textures = useTexture(framePaths);
-
-    // Animation control refs
+    // Animation control refs (smooth interpolation between choreography steps)
     const seqIndex = useRef(0);
     const seqTimer = useRef(0);
+    const fromR = useRef(SEQUENCE[SEQUENCE.length - 1].r);
+    const fromY = useRef(SEQUENCE[SEQUENCE.length - 1].y);
 
     // Apply color space and calculate dimensions once
     useEffect(() => {
-        textures.forEach(tex => tex.colorSpace = THREE.SRGBColorSpace);
+        texture.colorSpace = THREE.SRGBColorSpace;
 
-        if (textures[0] && textures[0].image) {
-            const aspectRatio = textures[0].image.width / textures[0].image.height;
+        if (texture.image) {
+            const aspectRatio = texture.image.width / texture.image.height;
             const baseHeight = 2.3; // Fixed size
             setDimensions({
                 width: baseHeight * aspectRatio,
                 height: baseHeight
             });
         }
-
-        // Set initial texture to avoid white flash, but don't bind it declaratively 
-        // to prevent React from overwriting our useFrame mutations
-        if (meshRef.current && textures[SEQUENCE[0].f]) {
-            meshRef.current.material.map = textures[SEQUENCE[0].f];
-            meshRef.current.material.needsUpdate = true;
-        }
-    }, [textures]);
+    }, [texture]);
 
     // Main animation loop
     useFrame((state, delta) => {
@@ -108,17 +99,27 @@ const Avatar = ({ position = [10, -20, 30] }) => {
         groupRef.current.position.x = position[0] + dodgeX.current;
         groupRef.current.position.y = position[1];
 
-        // === FRAME ANIMATION LOGIC (CHOREOGRAPHED SEQUENCE) ===
-        // Using delta for consistent speed regardless of monitor Hz
+        // === WAVE CHOREOGRAPHY (transform-based, delta-timed) ===
         seqTimer.current += delta;
 
-        if (seqTimer.current >= SEQUENCE[seqIndex.current].d) {
+        const step = SEQUENCE[seqIndex.current];
+        if (seqTimer.current >= step.d) {
+            fromR.current = step.r;
+            fromY.current = step.y;
             seqTimer.current = 0;
             seqIndex.current = (seqIndex.current + 1) % SEQUENCE.length;
-
-            meshRef.current.material.map = textures[SEQUENCE[seqIndex.current].f];
-            meshRef.current.material.needsUpdate = true;
         }
+
+        const next = SEQUENCE[seqIndex.current];
+        let t = Math.min(seqTimer.current / next.d, 1);
+        t = t * t * (3 - 2 * t); // smoothstep between steps
+        const waveR = fromR.current + (next.r - fromR.current) * t;
+        const waveY = fromY.current + (next.y - fromY.current) * t;
+
+        // Subtle idle breathing so the figure never looks frozen
+        const time = state.clock.elapsedTime;
+        meshRef.current.rotation.z = waveR + Math.sin(time * 1.8) * 0.01;
+        meshRef.current.position.y = waveY + Math.sin(time * 2.2) * 0.008;
     });
 
     return (
@@ -126,6 +127,7 @@ const Avatar = ({ position = [10, -20, 30] }) => {
             <mesh ref={meshRef}>
                 <planeGeometry args={[dimensions.width, dimensions.height]} />
                 <meshBasicMaterial color="#ffffff"
+                    map={texture}
                     transparent={true}
                     side={THREE.DoubleSide}
                     depthWrite={false}
