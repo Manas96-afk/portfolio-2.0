@@ -108,13 +108,7 @@ export const IMAGE_ASSETS = [
 
 // Additional textures from App.jsx and avatar animations
 export const UI_TEXTURES = [
-    '/textures/corridor/avatar_anim/1.webp',
-    '/textures/corridor/avatar_anim/2.webp',
-    '/textures/corridor/avatar_anim/3.webp',
-    '/textures/corridor/avatar_anim/4.webp',
-    '/textures/corridor/avatar_anim/5.webp',
-    '/textures/corridor/avatar_anim/6.webp',
-    '/textures/corridor/avatar_anim/7.webp',
+    '/textures/corridor/avatar_corridor.webp',
 ];
 
 // ============================================
