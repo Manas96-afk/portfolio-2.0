@@ -118,9 +118,9 @@ export const usePaintMaterial = (options = {}) => {
             // Create a glowing "wet paint" edge
             float glow = smoothstep(2.0, 0.0, boundary);
             
-            // Brighten edge to look like fresh digital paint
+            // Brighten edge to look like fresh digital paint — warm paper tone, no blue
             if (uPaintProgress < 0.999 && boundary < 2.0) {
-                gl_FragColor.rgb += vec3(glow * 0.4, glow * 0.5, glow * 0.7);
+                gl_FragColor.rgb += vec3(glow * 0.6, glow * 0.45, glow * 0.25);
             }
             `
         );
