@@ -501,19 +501,29 @@ const EntranceDoors = ({
         }
 
         // --- Window Avatar Animation ---
-        // Idle: gentle bob + slow sway. Hover: faster wiggle + bounce (waving).
+        // Hidden at rest (scale 0). Hovering the window reveals it: it pops
+        // into view with a small overshoot, rises into frame, then waves.
         if (windowAvatarRef.current) {
-            // Smoothly blend the hover factor so the wave eases in/out
-            const target = isWindowHovered ? 1 : 0;
+            // Smoothly blend the reveal factor so it eases in/out.
+            // Touch devices have no hover to discover this with, so they stay
+            // revealed permanently instead of never showing the character.
+            const target = isMobileDevice || isWindowHovered ? 1 : 0;
             windowAvatarWaveRef.current = THREE.MathUtils.lerp(
                 windowAvatarWaveRef.current,
                 target,
-                0.08
+                0.12
             );
             const w = windowAvatarWaveRef.current;
             const t = clock.elapsedTime;
 
-            windowAvatarRef.current.position.y = Math.sin(t * 2.2) * (0.02 + 0.03 * w);
+            // Reveal: scale 0 -> 1 with a slight pop as it appears
+            const pop = Math.sin(Math.PI * w) * 0.18;
+            windowAvatarRef.current.scale.setScalar(w + pop);
+
+            // Rise into the window while appearing, then idle bob
+            windowAvatarRef.current.position.y =
+                -0.3 * (1 - w) + Math.sin(t * 2.2) * (0.02 + 0.03 * w);
+
             windowAvatarRef.current.rotation.z =
                 Math.sin(t * 2.0) * 0.05 +   // slow sway (always)
                 Math.sin(t * 7.0) * 0.14 * w + // fast wiggle (hover)
@@ -797,11 +807,14 @@ const EntranceDoors = ({
                 distance={10}
             /> */}
             {/* AVATAR - separate from window group, behind bricks */}
-            {/* Rest position x = 2.5 (always visible in window); animated in useFrame */}
+            {/* Hidden at rest (scale 0); pops into the window on hover.
+                Animated in useFrame. Touch devices have no hover to discover
+                it with, so they keep it revealed (see the useFrame target). */}
             <mesh
                 ref={windowAvatarRef}
                 position={[2.5, 0, 0.04]}
                 rotation={[0, 0, 0]}
+                scale={isMobileDevice ? [1, 1, 1] : [0, 0, 0]}
             >
                 <planeGeometry args={[1.5, 1.5]} />
                 <meshBasicMaterial color="#e0e0e0"
