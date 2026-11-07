@@ -98,6 +98,10 @@ const DoorSection = ({
     const { camera } = useThree();
     const closeTimerRef = useRef(null);
     const loadTimeoutRef = useRef(null); // Ref for the room loading fallback timeout
+    const roomReadyRef = useRef(false); // Room signalled that it has finished mounting
+    const doorOpenStartedRef = useRef(false); // Guarantees openDoor() runs exactly once per click
+    const flyStartedRef = useRef(false); // Guarantees the fly-through runs exactly once per click
+    const flyTimeoutRef = useRef(null); // Polls roomReadyRef before flying the camera through
 
     // Get exit request signal from context
     const {
@@ -163,6 +167,10 @@ const DoorSection = ({
             setIsTiltLocked(false);
             setRoomReady(false);
             roomReadyRef.current = false;
+            doorOpenStartedRef.current = false;
+            flyStartedRef.current = false;
+            if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+            if (flyTimeoutRef.current) clearTimeout(flyTimeoutRef.current);
 
             // 2. Reset Door/Handle Rotation (Visuals)
             // We can do this instantly or very quickly since screen is covered
@@ -384,6 +392,7 @@ const DoorSection = ({
         return () => {
             if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
             if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+            if (flyTimeoutRef.current) clearTimeout(flyTimeoutRef.current);
         };
     }, []);
 
@@ -402,6 +411,14 @@ const DoorSection = ({
         document.body.style.cursor = "auto";
 
         setIsAnimating(true);
+
+        // Reset room-ready state so a previous visit can never block this one
+        if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+        if (flyTimeoutRef.current) clearTimeout(flyTimeoutRef.current);
+        roomReadyRef.current = false;
+        setRoomReady(false);
+        doorOpenStartedRef.current = false;
+        flyStartedRef.current = false;
 
         // Take control of camera from hook
         setCameraOverride?.(true);
@@ -506,25 +523,27 @@ const DoorSection = ({
                 // Lazy Load Room:
                 // 1. Camera is now aligned.
                 // 2. Start rendering the room.
-                // 3. Door will open when room signals ready via onReady callback
-                //    OR after fallback timeout for rooms without onReady support
+                // 3. Open the door IMMEDIATELY - the user should never stare at a
+                //    closed door while the room mounts.
+                // 4. The fly-through (inside openDoor) waits for the room's onReady
+                //    signal, but only for a short capped time.
                 setShouldRenderRoom(true);
 
-                // During FAST teleport, we still want to WAIT for the room to be ready!
-                // So we do NOT open immediately anymore. We let the onReady callback handle it.
-                // But we still set the flag so handleRoomReady knows to use fast animation.
+                if (!doorOpenStartedRef.current) {
+                    doorOpenStartedRef.current = true;
+                    openDoor(useFastMode);
+                }
 
-                // Fallback: If room doesn't call onReady within 8000ms, open door anyway
-                // This ensures all rooms work even if they don't implement onReady
+                // Safety net: if the room never calls onReady (e.g. an older room
+                // without support), unblock the fly-through after a short delay.
+                // Rooms normally signal within ~5 rendered frames.
                 loadTimeoutRef.current = setTimeout(() => {
                     if (!roomReadyRef.current) {
-                        console.warn(`[DoorSection ${label}] Room load timeout - forcing open`);
+                        console.warn(`[DoorSection ${label}] Room ready timeout - continuing anyway`);
                         roomReadyRef.current = true;
                         setRoomReady(true);
-                        // If it timed out, we still use the current mode preference
-                        openDoor(useFastMode);
                     }
-                }, 8000);
+                }, 1500);
             }
         });
     }, [camera, side, isOpen, isAnimating, setCameraOverride, isFastTeleport]);
@@ -556,65 +575,86 @@ const DoorSection = ({
             });
         }
 
+        // STEP 1: Fly camera forward in a STRAIGHT LINE.
+        // The room may still be mounting, so wait (briefly) for its onReady signal
+        // instead of flying into an empty vestibule.
+        const flyThrough = () => {
+            if (flyStartedRef.current) return;
+            flyStartedRef.current = true;
+
+            // Get the direction the camera is looking AT THE START
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+
+            const flyDistance = enterDistance; // Fly through short vestibule (3) + into room
+
+            // Calculate TARGET position BEFORE animating (so flight path is straight)
+            const targetX = camera.position.x + direction.x * flyDistance;
+            const targetZ = camera.position.z + direction.z * flyDistance;
+
+            gsap.to(camera.position, {
+                x: targetX,
+                z: targetZ,
+                duration: flyDuration,
+                ease: fastMode ? 'none' : 'power2.inOut',
+                onComplete: () => {
+                    // Save position AFTER flight
+                    roomEntryState.current = {
+                        x: camera.position.x,
+                        y: camera.position.y,
+                        z: camera.position.z,
+                        rotationY: camera.rotation.y
+                    };
+
+                    // NO ROTATION needed - we are already looking perpendicular to corridor
+                    // Just mark as inside
+                    setIsAnimating(false);
+                    setIsInsideRoom(true);
+
+                    // Defer context update exactly 250ms to strictly avoid any
+                    // stutter during the very last frames of the GSAP animation loop.
+                    setTimeout(() => {
+                        enterRoom(doorId); // Use ID ('gallery') not label ('THE GALLERY')
+                        onEnter?.();
+
+                        // FAST TELEPORT: Signal that room is ready - this opens the paper
+                        if (fastMode) {
+                            signalRoomReady();
+                        }
+                    }, 250);
+                }
+            });
+        };
+
+        const flyWhenRoomReady = () => {
+            if (roomReadyRef.current) {
+                flyThrough();
+                return;
+            }
+            const startedAt = performance.now();
+            const poll = () => {
+                // Hard cap: never leave the camera (and isAnimating) hanging
+                if (roomReadyRef.current || performance.now() - startedAt > 1500) {
+                    flyThrough();
+                    return;
+                }
+                flyTimeoutRef.current = setTimeout(poll, 60);
+            };
+            flyTimeoutRef.current = setTimeout(poll, 60);
+        };
+
         gsap.to(doorRef.current.rotation, {
             y: openAngle,
             duration: doorDuration,
             ease: fastMode ? 'none' : 'power2.out',
-            onComplete: () => {
-                // Door is open, now fly camera through the door
-                // Get the direction the camera is looking AT THE START
-                const direction = new THREE.Vector3();
-                camera.getWorldDirection(direction);
-
-                const flyDistance = enterDistance; // Fly through short vestibule (3) + into room
-
-                // Calculate TARGET position BEFORE animating (so flight path is straight)
-                const targetX = camera.position.x + direction.x * flyDistance;
-                const targetZ = camera.position.z + direction.z * flyDistance;
-
-                // STEP 1: Fly camera forward in a STRAIGHT LINE
-                gsap.to(camera.position, {
-                    x: targetX,
-                    z: targetZ,
-                    duration: flyDuration,
-                    ease: fastMode ? 'none' : 'power2.inOut',
-                    onComplete: () => {
-                        // Save position AFTER flight
-                        roomEntryState.current = {
-                            x: camera.position.x,
-                            y: camera.position.y,
-                            z: camera.position.z,
-                            rotationY: camera.rotation.y
-                        };
-
-                        // NO ROTATION needed - we are already looking perpendicular to corridor
-                        // Just mark as inside
-                        setIsAnimating(false);
-                        setIsInsideRoom(true);
-
-                        // Defer context update exactly 250ms to strictly avoid any
-                        // stutter during the very last frames of the GSAP animation loop.
-                        setTimeout(() => {
-                            enterRoom(doorId); // Use ID ('gallery') not label ('THE GALLERY')
-                            onEnter?.();
-
-                            // FAST TELEPORT: Signal that room is ready - this opens the paper
-                            if (fastMode) {
-                                signalRoomReady();
-                            }
-                        }, 250);
-                    }
-                });
-            }
+            onComplete: flyWhenRoomReady
         });
     }, [side, onEnter, camera, enterRoom, doorId, signalRoomReady]);
 
     // Handle room ready callback - open door when room is fully loaded
     // Use ref to prevent multiple calls (state might not update fast enough)
-    const roomReadyRef = useRef(false);
-
     const handleRoomReady = useCallback(() => {
-        // Guard: only call openDoor once
+        // Guard: only run once
         if (roomReadyRef.current) return;
 
         // Clear the fallback timeout since we are ready
@@ -622,8 +662,13 @@ const DoorSection = ({
 
         roomReadyRef.current = true;
         setRoomReady(true);
-        // Use the current context state to decide if we should do a fast open
-        openDoor(isFastTeleport);
+
+        // The door is normally already opening (opened right after the camera
+        // aligned). Only open it here if that somehow never happened.
+        if (!doorOpenStartedRef.current) {
+            doorOpenStartedRef.current = true;
+            openDoor(isFastTeleport);
+        }
     }, [openDoor, isFastTeleport]);
 
     // Exit room function - TRUE REVERSE animation (like rewinding video)
@@ -759,7 +804,13 @@ const DoorSection = ({
     }, [exitRequested, isInsideRoom, isAnimating, exitRoom]);
 
     const closeDoor = useCallback((onDoorClosed) => {
-        if (!doorRef.current || !isOpen) return;
+        if (flyTimeoutRef.current) clearTimeout(flyTimeoutRef.current);
+        if (!doorRef.current || !isOpen) {
+            // Nothing to animate - still run the caller's cleanup so state
+            // (isAnimating / isInsideRoom / camera override) can never wedge shut.
+            onDoorClosed?.();
+            return;
+        }
         if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
         if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
 
