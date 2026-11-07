@@ -43,6 +43,15 @@ const EntranceDoors = ({
     const [isWindowHovered, setIsWindowHovered] = useState(false);
     const windowAvatarRef = useRef();
     const windowAvatarWaveRef = useRef(0); // Smoothed 0..1 hover factor for avatar wave
+    // Window avatar peek: at rest the character is parked to the RIGHT of the
+    // window, behind the brick wall (the wall texture only has a cutout where
+    // the window is, so anything behind it stays hidden). Hovering slides it
+    // left so it peeks into the window from the right edge.
+    // Measured: window cutout spans world x 1.797..3.195 and the character
+    // occupies 2.563..3.249 at AVATAR_HOME_X, so hiding needs > 0.632 of
+    // slide; 0.75 clears the cutout edge even at max sway.
+    const AVATAR_HOME_X = 2.5;
+    const PEEK_HIDDEN_DX = 0.75;
     const { camera } = useThree();
     const { unlockAchievement } = useAchievements();
 
@@ -501,12 +510,12 @@ const EntranceDoors = ({
         }
 
         // --- Window Avatar Animation ---
-        // Hidden at rest (scale 0). Hovering the window reveals it: it pops
-        // into view with a small overshoot, rises into frame, then waves.
+        // Peeks in from the RIGHT side of the window: at rest it's parked
+        // behind the wall to the right of the cutout; hovering slides it left
+        // into view, then it waves. Touch devices have no hover to discover
+        // this with, so they stay revealed instead of never showing it.
         if (windowAvatarRef.current) {
-            // Smoothly blend the reveal factor so it eases in/out.
-            // Touch devices have no hover to discover this with, so they stay
-            // revealed permanently instead of never showing the character.
+            // Smoothly blend the reveal factor so the peek eases in/out.
             const target = isMobileDevice || isWindowHovered ? 1 : 0;
             windowAvatarWaveRef.current = THREE.MathUtils.lerp(
                 windowAvatarWaveRef.current,
@@ -516,13 +525,14 @@ const EntranceDoors = ({
             const w = windowAvatarWaveRef.current;
             const t = clock.elapsedTime;
 
-            // Reveal: scale 0 -> 1 with a slight pop as it appears
-            const pop = Math.sin(Math.PI * w) * 0.18;
-            windowAvatarRef.current.scale.setScalar(w + pop);
+            // Slide: hidden behind the wall (dx = PEEK_HIDDEN_DX) -> home x.
+            // Skips past the cutout edge as w rises, so it reads as a peek.
+            windowAvatarRef.current.position.x =
+                AVATAR_HOME_X + PEEK_HIDDEN_DX * (1 - w);
 
-            // Rise into the window while appearing, then idle bob
+            // Slight rise out of the window as it peeks, then idle bob
             windowAvatarRef.current.position.y =
-                -0.3 * (1 - w) + Math.sin(t * 2.2) * (0.02 + 0.03 * w);
+                -0.1 * (1 - w) + Math.sin(t * 2.2) * (0.02 + 0.03 * w);
 
             windowAvatarRef.current.rotation.z =
                 Math.sin(t * 2.0) * 0.05 +   // slow sway (always)
@@ -807,14 +817,14 @@ const EntranceDoors = ({
                 distance={10}
             /> */}
             {/* AVATAR - separate from window group, behind bricks */}
-            {/* Hidden at rest (scale 0); pops into the window on hover.
+            {/* Peek: parked behind the wall to the RIGHT of the window cutout
+                (x = HOME + PEEK_HIDDEN_DX); hovering slides it left into view.
                 Animated in useFrame. Touch devices have no hover to discover
-                it with, so they keep it revealed (see the useFrame target). */}
+                it with, so they stay revealed (see the useFrame target). */}
             <mesh
                 ref={windowAvatarRef}
-                position={[2.5, 0, 0.04]}
+                position={[AVATAR_HOME_X + PEEK_HIDDEN_DX, 0, 0.04]}
                 rotation={[0, 0, 0]}
-                scale={isMobileDevice ? [1, 1, 1] : [0, 0, 0]}
             >
                 <planeGeometry args={[1.5, 1.5]} />
                 <meshBasicMaterial color="#e0e0e0"
