@@ -233,20 +233,12 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     
     useTexture(allLogos);
 
-    // Construct the full list of projects (shuffled once per session, no duplicates)
-    const projects = useMemo(() => {
-        // Shuffle once for random order, stable per session
-        const shuffledProjects = shuffleArray(activeProjects, 12345);
-        const projectCount = shuffledProjects.length;
-
-        return Array.from({ length: projectCount }).map((_, i) => {
-            const projectData = shuffledProjects[i];
-
-            // Extract front texture
+    // 1. Associate each project with its own textures
+    const configuredProjects = useMemo(() => {
+        return activeProjects.map((projectData, i) => {
             const frontTex = projectTextures[i];
             const paintedTex = paintedTextures[i];
 
-            // Configure textures
             if (frontTex) {
                 frontTex.colorSpace = THREE.SRGBColorSpace;
             }
@@ -260,9 +252,8 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 overlayTextureRaw.colorSpace = THREE.SRGBColorSpace;
             }
 
-            // Map tech stack logos to the correct version (painted or regular)
-            const techStack = projectData.techStack.map(path => {
-                if (!canHover) return path; // Keep regular
+            const techStack = (projectData.techStack || []).map(path => {
+                if (!canHover) return path;
                 const name = path.split('/').pop().replace('.webp', '');
                 if (name === 'csslogo') return '/textures/gallery/css3logo_painted.webp';
                 return `/textures/gallery/${name}_painted.webp`;
@@ -270,7 +261,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
 
             return {
                 ...projectData,
-                index: i,
+                originalIndex: i,
                 frontTexture: frontTex,
                 paintedTexture: (paintedTex !== frontTex && canHover) ? paintedTex : null,
                 backTexture: backTextureRaw,
@@ -279,6 +270,25 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
             };
         });
     }, [projectTextures, paintedTextures, backTextureRaw, overlayTextureRaw, activeProjects, canHover]);
+
+    // 2. Construct the full list of projects with a truly randomized sequence per visit
+    const projects = useMemo(() => {
+        if (!configuredProjects.length) return [];
+
+        // Fisher-Yates true random shuffle
+        const shuffled = [...configuredProjects];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+
+        // Loop the randomized sequence to 8 cards so the clothesline covers the 20m balcony seamlessly
+        const TOTAL_CARDS = Math.max(8, shuffled.length * 2);
+        return Array.from({ length: TOTAL_CARDS }).map((_, i) => ({
+            ...shuffled[i % shuffled.length],
+            index: i
+        }));
+    }, [configuredProjects]);
 
     // Function to scroll to a specific project index
     const scrollToIndex = (index, onComplete) => {
@@ -344,7 +354,12 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     }, [showRoom, selectedCard, globalIsAnimating]);
 
     useFrame((state, delta) => {
-        currentScroll.current = THREE.MathUtils.lerp(currentScroll.current, targetScroll.current, delta * 5);
+        // Keep both ends finite: once either side turns NaN it would stay NaN
+        // forever, and every card's curve lookup would then throw.
+        if (!Number.isFinite(targetScroll.current)) targetScroll.current = 0;
+        const from = Number.isFinite(currentScroll.current) ? currentScroll.current : 0;
+        const step = Number.isFinite(delta) ? delta * 5 : 0;
+        currentScroll.current = THREE.MathUtils.lerp(from, targetScroll.current, step);
     });
 
     // --- GEOMETRY & MATERIALS ---
@@ -584,14 +599,8 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 {/* Flying Bird */}
                 <FlyingBird texture={birdTexture} />
 
-                {/* Clouds scattered above */}
-                <GalleryClouds count={65} seed={123} />
-
-                {/* Skybox/Environment */}
-                <mesh position={[0, 5, -20]}>
-                    <sphereGeometry args={[40, 32, 32]} />
-                    <meshBasicMaterial color="#bfe4f7" side={THREE.BackSide} transparent opacity={0.5} onBeforeCompile={onBeforeCompile} />
-                </mesh>
+                {/* Clouds scattered above (optimized count for performance) */}
+                <GalleryClouds count={18} seed={123} />
             </group>
         </group>
     );
@@ -675,7 +684,7 @@ const FlyingBird = ({ texture }) => {
 };
 
 // Sub-component for individual project cards
-const ProjectCard = memo(forwardRef(({ index, project, clothespinTexture, currentScroll, materials, curve, isSelected, scrollToIndex, onClick, isMobile, isTransitioning, paintProgress, roomOrigin }, ref) => {
+const ProjectCard = memo(forwardRef(({ index, total, project, clothespinTexture, currentScroll, materials, curve, isSelected, scrollToIndex, onClick, isMobile, isTransitioning, paintProgress, roomOrigin }, ref) => {
     const cardRef = useRef();
     const paperRef = useRef(); // Ref for the moving part (Paper)
     const materialRef = useRef();
@@ -1040,13 +1049,24 @@ const ProjectCard = memo(forwardRef(({ index, project, clothespinTexture, curren
         // Skip position updates ONLY during flip animation, NOT during scroll
         if (isAnimating || isSelected) return;
 
-        const totalWidth = projects.length * GAP; // GAP is available in scope because we are in the file where GAP is defined
-        let rawX = (index * GAP) - currentScroll.current;
+        // `total` (the card count) is passed in as a prop. Do NOT read a
+        // free-variable `projects` here: ProjectCard is module-level, so that
+        // binding is out of scope and resolved to something whose .length is
+        // not a number — which made totalWidth NaN.
+        const projectCount = Number.isFinite(total) && total > 0 ? total : 1;
+        const totalWidth = projectCount * GAP;
+
+        const scrollPos = Number.isFinite(currentScroll.current) ? currentScroll.current : 0;
+        let rawX = (index * GAP) - scrollPos;
         const halfWidth = totalWidth / 2;
         let displayX = ((rawX + halfWidth) % totalWidth + totalWidth) % totalWidth - halfWidth;
 
         const u = (displayX + 16) / 32;
-        const safeU = THREE.MathUtils.clamp(u, 0, 1);
+        // THREE.MathUtils.clamp() passes NaN straight through, and
+        // CatmullRomCurve3.getPointAt(NaN) throws a TypeError on every frame.
+        // That exception aborts the frame before gl.render(), so the gallery
+        // rendered as a blank screen and felt impossible to enter.
+        const safeU = Number.isFinite(u) ? THREE.MathUtils.clamp(u, 0, 1) : 0;
         const pointOnCurve = curve.getPointAt(safeU);
 
         cardRef.current.position.set(pointOnCurve.x, pointOnCurve.y, pointOnCurve.z);
@@ -1272,8 +1292,11 @@ const ProjectCard = memo(forwardRef(({ index, project, clothespinTexture, curren
                 */}
                 <Text
                     ref={textRef}
-                    position={[0, 0.7, 0]} // Tylko dwa pierwsze parametry [X, Y] mają tutaj znaczenie
-                    fontSize={0.20}
+                    position={[0, 0.71, 0.01]}
+                    fontSize={0.11}
+                    maxWidth={1.15}
+                    lineHeight={1.15}
+                    textAlign="center"
                     color="#1c1c1c"
                     font="/fonts/CabinSketch-Bold.ttf"
                     anchorX="center"

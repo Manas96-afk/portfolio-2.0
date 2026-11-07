@@ -92,7 +92,7 @@ const StaticCloud = ({ position, scale, opacity, textureIndex, driftSpeed, initi
         '254b8ec8-d6f7-4275-956f-7bab65b2ce2d.webp': 2.459,
         '2cc88dd1-483c-466d-b07e-f8308c61ccbe.webp': 3.577,
         '5606fcc0-3252-447d-a58a-7bcbac73229a.webp': 1.794,
-        '7882dc72-3d01-41fb-ac0e-d07b0184ebc1.webp': 1.997,
+        '7882dc72-3d01-41fb-ac0e-d07b0184ebc1.webp': 1.012,
         '9b2ca72f-7bd0-473b-ba6e-dd9e0eb79d35.webp': 1.905,
         'c83293c6-d90c-4a32-8d9d-5ac9af7e2296.webp': 3,
         'f6e358bc-d27c-41dd-95f4-6787a835c41e.webp': 1.875
@@ -103,11 +103,16 @@ const StaticCloud = ({ position, scale, opacity, textureIndex, driftSpeed, initi
     const width = 2.5 * scale;
     const height = width / aspectRatio;
 
+    // Precompute rotation quaternion once outside useFrame to eliminate allocations
+    const offsetQuaternion = useMemo(() => {
+        const offsetRotation = new THREE.Euler(rotationOffset[0], rotationOffset[1], rotationOffset[2]);
+        return new THREE.Quaternion().setFromEuler(offsetRotation);
+    }, [rotationOffset]);
+
     useFrame(({ camera, clock }) => {
         if (!meshRef.current) return;
 
         // Continuous linear movement from right to left with looping
-        // initialOffset zapewnia że każda chmura startuje w innym miejscu
         const time = clock.getElapsedTime();
         const progress = ((time * driftSpeed + initialOffset) % (totalDistance + 10)) - 5;
         const currentX = startX - progress;
@@ -116,9 +121,7 @@ const StaticCloud = ({ position, scale, opacity, textureIndex, driftSpeed, initi
         meshRef.current.position.y = basePosition.current[1];
         meshRef.current.position.z = basePosition.current[2];
 
-        // Billboard - always face camera with rotation offset
-        const offsetRotation = new THREE.Euler(rotationOffset[0], rotationOffset[1], rotationOffset[2]);
-        const offsetQuaternion = new THREE.Quaternion().setFromEuler(offsetRotation);
+        // Billboard - always face camera with rotation offset (zero object allocation)
         meshRef.current.quaternion.copy(camera.quaternion).multiply(offsetQuaternion);
     });
 
