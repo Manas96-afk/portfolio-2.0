@@ -137,7 +137,7 @@ const HeroText = ({ position = [0, 0.3, 0] }) => {
             {/* ITOM Letters - Rubik Scribble font with fade-in animation */}
             {letters.map((letter, i) => (
                 <Text
-                    key={letter.char}
+                    key={`letter-${i}`}
                     ref={(el) => (letterRefs.current[i] = el)}
                     position={[letter.baseX, 0.2, 0]}
                     fontSize={0.9}
@@ -158,7 +158,7 @@ const HeroText = ({ position = [0, 0.3, 0] }) => {
                 const isSecondLine = i >= 4;
                 return (
                     <Text
-                        key={word.text}
+                        key={`word-${i}`}
                         ref={(el) => (taglineRefs.current[i] = el)}
                         position={[word.baseX, word.baseY, 0.3]}
                         fontSize={isSecondLine ? 0.14 : 0.16}
