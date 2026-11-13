@@ -19,23 +19,35 @@ import * as THREE from 'three';
 // Choreography: build-up (lean back), double wave-bounce with holds,
 // then settle back to rest. Per-step duration in seconds.
 // r = body rotation.z (radians), y = hop offset (units), d = duration.
+//
+// Amplitudes are deliberately generous: at 191px per world unit a 0.16-unit
+// hop is ~30px on screen, which reads as motion from across the room. The
+// opening rest is kept short (0.55s) and is covered by IDLE_* below, so the
+// figure is never actually frozen.
 const SEQUENCE = [
-    { r: 0.00, y: 0.000, d: 0.95 }, // rest: noticing the visitor
-    { r: -0.10, y: 0.000, d: 0.15 }, // fast build-up: lean back
-    { r: -0.14, y: 0.020, d: 0.15 },
-    { r: 0.06, y: 0.080, d: 0.17 }, // launch up (small hold)
-    { r: 0.16, y: 0.040, d: 0.12 }, // wave: up
-    { r: -0.02, y: 0.080, d: 0.10 }, // mid
-    { r: 0.18, y: 0.050, d: 0.15 }, // high peak (hold)
-    { r: -0.02, y: 0.080, d: 0.10 },
-    { r: 0.16, y: 0.040, d: 0.12 }, // second bounce
-    { r: 0.18, y: 0.060, d: 0.20 }, // high peak (longer hold)
-    { r: -0.02, y: 0.080, d: 0.10 },
-    { r: 0.16, y: 0.040, d: 0.13 },
-    { r: 0.05, y: 0.020, d: 0.13 }, // lowering back down
-    { r: -0.04, y: 0.000, d: 0.13 },
-    { r: 0.00, y: 0.000, d: 0.14 }, // settle to rest
+    { r: 0.00, y: 0.000, d: 0.55 }, // brief rest: noticing the visitor
+    { r: -0.16, y: 0.010, d: 0.16 }, // fast build-up: lean back
+    { r: -0.22, y: 0.045, d: 0.16 },
+    { r: 0.10, y: 0.130, d: 0.18 }, // launch up (small hold)
+    { r: 0.24, y: 0.065, d: 0.13 }, // wave: up
+    { r: -0.04, y: 0.135, d: 0.11 }, // mid
+    { r: 0.26, y: 0.085, d: 0.17 }, // high peak (hold)
+    { r: -0.04, y: 0.135, d: 0.11 },
+    { r: 0.24, y: 0.065, d: 0.13 }, // second bounce
+    { r: 0.26, y: 0.100, d: 0.22 }, // high peak (longer hold)
+    { r: -0.04, y: 0.135, d: 0.11 },
+    { r: 0.24, y: 0.065, d: 0.14 },
+    { r: 0.08, y: 0.035, d: 0.14 }, // lowering back down
+    { r: -0.06, y: 0.000, d: 0.14 },
+    { r: 0.00, y: 0.000, d: 0.16 }, // settle to rest
 ];
+
+// Continuous idle overlay. Runs on top of every choreography step so the
+// figure always has visible life, including during the rest/settle steps.
+// Values are in the same units as SEQUENCE (radians / world units).
+const IDLE_ROT = 0.055;  // ~11px of head swing at rest
+const IDLE_HOP = 0.032;  // ~6px vertical bob at rest
+const IDLE_SWAY = 0.020; // ~4px lateral drift at rest
 
 const Avatar = ({ position = [10, -20, 30] }) => {
     const meshRef = useRef();
@@ -116,10 +128,17 @@ const Avatar = ({ position = [10, -20, 30] }) => {
         const waveR = fromR.current + (next.r - fromR.current) * t;
         const waveY = fromY.current + (next.y - fromY.current) * t;
 
-        // Subtle idle breathing so the figure never looks frozen
+        // Subtle idle breathing so the figure never looks frozen.
+        // Combined with the short rest step, this keeps the character in
+        // continuous visible motion rather than twitch-then-freeze.
         const time = state.clock.elapsedTime;
-        meshRef.current.rotation.z = waveR + Math.sin(time * 1.8) * 0.01;
-        meshRef.current.position.y = waveY + Math.sin(time * 2.2) * 0.008;
+        const idleR = Math.sin(time * 1.5) * IDLE_ROT + Math.sin(time * 0.63) * IDLE_ROT * 0.45;
+        const idleY = Math.sin(time * 2.15) * IDLE_HOP;
+        const idleX = Math.sin(time * 1.05) * IDLE_SWAY;
+
+        meshRef.current.rotation.z = waveR + idleR;
+        meshRef.current.position.y = waveY + idleY;
+        meshRef.current.position.x = idleX;
     });
 
     return (
