@@ -56,7 +56,20 @@ const TOWER_Z_START = -10; // Starting Z position (negative = further away) -> C
 const StudioRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     const groupRef = useRef();
     const towerRef = useRef();
-    const { camera, size } = useThree();
+    const { camera, size, scene } = useThree();
+
+    // The monitor tower floats in open space, so the global sky-blue scene
+    // background (#bfe4f7) showed through behind it. Swap it for paper cream
+    // while inside the real room so the backdrop stays in the sketchbook
+    // world; cream equals the fog colour, so distant monitors fade
+    // seamlessly into it. The warmup mount must not touch the background.
+    useEffect(() => {
+        if (isWarmup) return;
+        scene.background = new THREE.Color(CORRIDOR_PALETTE.fog);
+        return () => {
+            scene.background = new THREE.Color(CORRIDOR_PALETTE.atmosphere);
+        };
+    }, [scene, isWarmup]);
 
     // Responsive camera parameters based on PIXEL width
     const responsiveParams = useMemo(() => {
