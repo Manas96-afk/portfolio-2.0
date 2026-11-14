@@ -17,37 +17,39 @@ const LOOP_BOTTOM = -15;
 const LOOP_TOP = 15;
 const LOOP_HEIGHT = LOOP_TOP - LOOP_BOTTOM;
 
-// Symbol definitions with their visual weight
+// Symbol definitions with their visual weight - video-editing motifs
+// (transport controls, edit operations, keyframes, timecodes, clip blocks).
+// ASCII text renders in Cabin Sketch; geometric glyphs fall back to troika's
+// Unicode fallback fonts, which the old code symbols (arrows, blocks) already did.
 const SYMBOLS = [
-    // Code brackets - larger
-    { text: '{/}', size: 0.8, weight: 2 },
-    { text: '</>', size: 0.8, weight: 2 },
-    { text: '{ }', size: 0.7, weight: 1 },
-    { text: '{ • }', size: 0.7, weight: 1 },
+    // Transport controls - larger
+    { text: '▶', size: 0.8, weight: 2 },
+    { text: '●', size: 0.8, weight: 1 },
+    { text: '⏸', size: 0.7, weight: 1 },
 
-    // Operators & punctuation - medium
-    { text: ';', size: 0.5, weight: 3 },
-    { text: '::', size: 0.4, weight: 2 },
-    { text: '=>', size: 0.5, weight: 2 },
-    { text: '//', size: 0.5, weight: 2 },
-    { text: '&&', size: 0.4, weight: 1 },
+    // Edit operations - larger / medium
+    { text: 'CUT', size: 0.7, weight: 2 },
+    { text: 'TRIM', size: 0.6, weight: 2 },
+    { text: 'SPLIT', size: 0.5, weight: 2 },
+    { text: 'FADE', size: 0.5, weight: 2 },
+    { text: 'B-ROLL', size: 0.5, weight: 1 },
+    { text: 'J-CUT', size: 0.5, weight: 1 },
 
-    // Binary - small scattered
-    { text: '0', size: 0.3, weight: 4 },
-    { text: '1', size: 0.3, weight: 4 },
-    { text: '01', size: 0.35, weight: 3 },
-    { text: '0101', size: 0.4, weight: 2 },
-    { text: '00', size: 0.35, weight: 2 },
+    // Keyframes & timeline - medium
+    { text: '◆', size: 0.5, weight: 2 },
+    { text: '↔', size: 0.4, weight: 1 },
+    { text: 'REC', size: 0.5, weight: 1 },
 
-    // Arrows & misc
-    { text: '↑', size: 0.4, weight: 2 },
-    { text: '→', size: 0.4, weight: 1 },
-    { text: '←', size: 0.4, weight: 1 },
-    { text: '×', size: 0.3, weight: 2 },
-    { text: '•', size: 0.25, weight: 3 },
-    { text: '○', size: 0.3, weight: 2 },
+    // Timecodes & specs - small scattered
+    { text: '01:23', size: 0.35, weight: 3 },
+    { text: '00:00', size: 0.35, weight: 2 },
+    { text: '24fps', size: 0.35, weight: 3 },
+    { text: '60fps', size: 0.3, weight: 3 },
+    { text: '4K', size: 0.4, weight: 2 },
+    { text: '1080p', size: 0.3, weight: 2 },
+    { text: 'EXPORT', size: 0.35, weight: 1 },
 
-    // Pixel-like patterns
+    // Clip blocks on a timeline - small
     { text: '▪▪\n▪', size: 0.25, weight: 2 },
     { text: '▪ ▪\n ▪', size: 0.25, weight: 1 },
     { text: '▪▪▪', size: 0.2, weight: 2 },
