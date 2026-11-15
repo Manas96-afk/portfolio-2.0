@@ -9,8 +9,13 @@ import * as THREE from 'three';
  * (smoothstep on luminance) so only the line art remains - visually the
  * same as the transparent avatar_corridor.webp it replaces, but moving.
  *
- * - playbackRate 0.65 calms the 60fps source down to a smooth, slightly
- *   slow wave (the 2.27s loop stretches to ~3.49s).
+ * - playbackRate must be 0.5 (not 0.65): the source is 60fps, and a
+ *   fractional rate like 0.65 makes the browser hold frames for an
+ *   irregular 1/2 display frames, which reads as micro-judder. 0.5
+ *   doubles every source frame evenly (exactly 2 vsync at 60Hz, 4 at
+ *   120Hz) for a perfectly smooth, slightly slow wave — the 2.27s loop
+ *   stretches to 4.54s. Never use a rate that isn't a clean divisor
+ *   of the source fps.
  * - avatar2_720.mp4 is a 720x1280 re-encode of avatar(2).mp4 (136 frames
  *   @ 60fps, 2.27s loop, kept untouched). Uploading full-size frames every
  *   video frame cost ~46fps of the corridor's budget (33fps with a 4K

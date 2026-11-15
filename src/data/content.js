@@ -22,33 +22,25 @@ export const PERSONAL = {
 // front  = black & white "sketch" version
 // painted = full colour version (revealed on hover)
 // ============================================
+// NOTE: every public repo from https://github.com/Manas96-afk (private repos excluded).
+// front/painted marked "placeholder" reuse an existing image — swap in real screenshots later.
 export const GALLERY_PROJECTS = [
     {
         id: 'rasmalai',
         title: 'RASMALAI AI ASSISTANT',
-        url: 'https://github.com/Manas96-afk',
+        url: 'https://github.com/Manas96-afk/Rasmalai-The_Persional_AI',
         description:
-            'An AI desktop assistant built with Python and Gemini Flash. It handles voice and vision commands, runs in the system tray, and acts as a lightweight everyday companion on your computer.',
+            'A lightweight, local-first personal AI desktop companion. Automatic mode detection (Gaming/Editing), Alt+V push-to-talk, screen analysis with Gemini Flash, and Hinglish voice interaction from the system tray.',
         front: '/projects/rasmalai.webp',
         painted: '/projects/rasmalai_painted.webp',
         techStack: ['/textures/gallery/reactlogo.webp', '/textures/gallery/jslogo.webp'],
     },
     {
-        id: 'manas-personal-website',
-        title: 'MANAS — PERSONAL WEBSITE',
-        url: 'https://manas-bandhu.vercel.app',
-        description:
-            'My personal portfolio site built with TypeScript and React, styled with hand-tuned CSS and deployed on Vercel. A clean, fast home for my work and writing.',
-        front: '/projects/manas-personal-website.webp',
-        painted: '/projects/manas-personal-website_painted.webp',
-        techStack: ['/textures/gallery/reactlogo.webp', '/textures/gallery/jslogo.webp', '/textures/gallery/csslogo.webp'],
-    },
-    {
         id: 'drugdex',
         title: 'DRUGDEX',
-        url: 'https://github.com/Manas96-afk',
+        url: 'https://github.com/Manas96-afk/DrugDex',
         description:
-            'A healthcare platform with a Node and Express REST API. Ships 11 REST endpoints and a fuzzy search engine for fast, forgiving drug lookups.',
+            'An all-in-one healthcare platform for medicine discovery, smart search, price comparison, alternative medicine suggestions, doctor consultation, and personalized health management. Built with Node.js, Express.js, and JavaScript.',
         front: '/projects/drugdex.webp',
         painted: '/projects/drugdex_painted.webp',
         techStack: ['/textures/gallery/jslogo.webp', '/textures/gallery/htmllogo.webp', '/textures/gallery/csslogo.webp', '/textures/gallery/firebaselogo.webp'],
@@ -56,12 +48,52 @@ export const GALLERY_PROJECTS = [
     {
         id: 'matelbuild',
         title: 'MATELBUILD',
-        url: 'https://github.com/Manas96-afk',
+        url: 'https://github.com/Manas96-afk/Matelbuild',
         description:
-            'An upcoming build — currently in the workshop. Drop by the studio or check back soon for the release.',
+            'An intelligent civil engineering material estimation and construction budgeting platform with AI-powered blueprint analysis, real-time quantity takeoff, automated BOQ cost generation, and site progress tracking.',
         front: '/projects/matelbuild.webp',
         painted: '/projects/matelbuild_painted.webp',
         techStack: ['/textures/gallery/jslogo.webp', '/textures/gallery/reactlogo.webp'],
+    },
+    {
+        id: 'all-in-one-life-solver',
+        title: 'ALL-IN-ONE LIFE SOLVER',
+        url: 'https://github.com/Manas96-afk/all-in-one-life-solver',
+        description:
+            'An AI-powered life assistance platform offering smart tools, personalized guidance, practical life hacks, and step-by-step solutions for everyday challenges — career, fitness, mental wellness, relationships, and education.',
+        front: '/projects/gta-cars.webp', // placeholder
+        painted: '/projects/gta-cars_painted.webp', // placeholder
+        techStack: ['/textures/gallery/jslogo.webp', '/textures/gallery/htmllogo.webp', '/textures/gallery/csslogo.webp'],
+    },
+    {
+        id: 'portfolio-2.0',
+        title: 'PORTFOLIO 2.0',
+        url: 'https://github.com/Manas96-afk/portfolio-2.0',
+        description:
+            'This site — a cinematic interactive 3D portfolio built with React Three Fiber, GSAP, and hand-drawn textures, exploring video editing, motion design, and software engineering.',
+        front: '/projects/macbook.webp', // placeholder
+        painted: '/projects/macbook_painted.webp', // placeholder
+        techStack: ['/textures/gallery/reactlogo.webp', '/textures/gallery/jslogo.webp'],
+    },
+    {
+        id: 'yt-cutter',
+        title: 'YT-CUTTER',
+        url: 'https://github.com/Manas96-afk/yt-cutter',
+        description:
+            'Chrome extension to download YouTube videos or cut exact clips in the highest quality with audio.',
+        front: '/projects/on-beat.webp', // placeholder
+        painted: '/projects/on-beat_painted.webp', // placeholder
+        techStack: ['/textures/gallery/jslogo.webp', '/textures/gallery/htmllogo.webp'],
+    },
+    {
+        id: 'manas-personal-website',
+        title: 'MANAS — PERSONAL WEBSITE',
+        url: 'https://github.com/Manas96-afk/Portfolio',
+        description:
+            'My personal portfolio site built with TypeScript and React, styled with hand-tuned CSS and deployed on Vercel. A clean, fast home for my work and writing.',
+        front: '/projects/manas-personal-website.webp',
+        painted: '/projects/manas-personal-website_painted.webp',
+        techStack: ['/textures/gallery/reactlogo.webp', '/textures/gallery/jslogo.webp', '/textures/gallery/csslogo.webp'],
     },
 ];
 
