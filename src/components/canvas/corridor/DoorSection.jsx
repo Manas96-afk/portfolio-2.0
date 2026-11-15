@@ -102,6 +102,7 @@ const DoorSection = ({
     const doorOpenStartedRef = useRef(false); // Guarantees openDoor() runs exactly once per click
     const flyStartedRef = useRef(false); // Guarantees the fly-through runs exactly once per click
     const flyTimeoutRef = useRef(null); // Polls roomReadyRef before flying the camera through
+    const alignDoneRef = useRef(false); // Camera finished aligning - gates door open / fly-through
 
     // Get exit request signal from context
     const {
@@ -419,6 +420,12 @@ const DoorSection = ({
         setRoomReady(false);
         doorOpenStartedRef.current = false;
         flyStartedRef.current = false;
+        alignDoneRef.current = false;
+
+        // Start mounting the room IMMEDIATELY so its (heavy) React mount overlaps
+        // the camera-align animation instead of happening after it. The door/fly
+        // stay gated on alignDoneRef below, so the choreography is unchanged.
+        setShouldRenderRoom(true);
 
         // Take control of camera from hook
         setCameraOverride?.(true);
@@ -457,7 +464,7 @@ const DoorSection = ({
         // FAST TELEPORT: Use ultra-fast animation durations (almost instant)
         // The paper is closed so user won't see the fast motion
         const useFastMode = isTeleport && isFastTeleport;
-        const alignDuration = useFastMode ? 0.01 : 1.0;
+        const alignDuration = useFastMode ? 0.01 : 0.65;
 
         // Get door world position
         const doorWorldPos = new THREE.Vector3();
@@ -527,6 +534,7 @@ const DoorSection = ({
                 //    closed door while the room mounts.
                 // 4. The fly-through (inside openDoor) waits for the room's onReady
                 //    signal, but only for a short capped time.
+                alignDoneRef.current = true;
                 setShouldRenderRoom(true);
 
                 if (!doorOpenStartedRef.current) {
@@ -563,8 +571,8 @@ const DoorSection = ({
 
         // FAST MODE: Ultra-fast durations for teleport entry
         const handleDuration = fastMode ? 0.01 : 0.15;
-        const doorDuration = fastMode ? 0.01 : 0.7;
-        const flyDuration = fastMode ? 0.01 : 1.5;
+        const doorDuration = fastMode ? 0.01 : 0.45;
+        const flyDuration = fastMode ? 0.01 : 0.95;
 
         // Animate handle down first
         if (handleRef.current) {
@@ -611,7 +619,7 @@ const DoorSection = ({
                     setIsAnimating(false);
                     setIsInsideRoom(true);
 
-                    // Defer context update exactly 250ms to strictly avoid any
+                    // Defer context update 150ms to strictly avoid any
                     // stutter during the very last frames of the GSAP animation loop.
                     setTimeout(() => {
                         enterRoom(doorId); // Use ID ('gallery') not label ('THE GALLERY')
@@ -621,7 +629,7 @@ const DoorSection = ({
                         if (fastMode) {
                             signalRoomReady();
                         }
-                    }, 250);
+                    }, 150);
                 }
             });
         };
@@ -664,8 +672,9 @@ const DoorSection = ({
         setRoomReady(true);
 
         // The door is normally already opening (opened right after the camera
-        // aligned). Only open it here if that somehow never happened.
-        if (!doorOpenStartedRef.current) {
+        // aligned). Only open it here if that somehow never happened - and only
+        // once the camera has finished aligning (room may mount before align).
+        if (!doorOpenStartedRef.current && alignDoneRef.current) {
             doorOpenStartedRef.current = true;
             openDoor(isFastTeleport);
         }

@@ -60,7 +60,7 @@ const AboutRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     // Track if we've signaled ready
     const hasSignaledReady = useRef(false);
     const frameCount = useRef(0);
-    const FRAMES_TO_WAIT = 25;
+    const FRAMES_TO_WAIT = 8;
 
     // Momentum-based scroll state
     const scrollPosition = useRef(0);

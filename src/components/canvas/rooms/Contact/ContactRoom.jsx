@@ -190,7 +190,7 @@ const ContactRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     // Track if we've signaled ready
     const hasSignaledReady = useRef(false);
     const frameCount = useRef(0);
-    const FRAMES_TO_WAIT = 5;
+    const FRAMES_TO_WAIT = 3;
 
     // Phase state
     const [currentPhase, setCurrentPhase] = useState(PHASE.ENTERING);

@@ -184,7 +184,7 @@ const StudioRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     // Track if we've signaled ready
     const hasSignaledReady = useRef(false);
     const frameCount = useRef(0);
-    const FRAMES_TO_WAIT = 5; // Wait for 5 actual render frames
+    const FRAMES_TO_WAIT = 3; // Wait for 3 actual render frames
 
     // Real render-based ready detection - count actual rendered frames
     useFrame(() => {

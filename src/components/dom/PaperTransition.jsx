@@ -112,14 +112,14 @@ const PaperTransition = () => {
             timelineRef.current.to(leftHalfRef.current, {
                 xPercent: 0,
                 rotation: 0,
-                duration: 0.8,
+                duration: 0.55,
                 ease: "power2.inOut"
             }, 'close');
 
             timelineRef.current.to(rightHalfRef.current, {
                 xPercent: 0,
                 rotation: 0,
-                duration: 0.8,
+                duration: 0.55,
                 ease: "power2.inOut"
             }, 'close');
         }
@@ -143,14 +143,14 @@ const PaperTransition = () => {
             timelineRef.current.to(leftHalfRef.current, {
                 xPercent: -100,
                 rotation: -2,
-                duration: 1.2,
+                duration: 0.9,
                 ease: "power3.inOut"
             }, 'tear');
 
             timelineRef.current.to(rightHalfRef.current, {
                 xPercent: 100,
                 rotation: 2,
-                duration: 1.2,
+                duration: 0.9,
                 ease: "power3.inOut"
             }, 'tear');
 

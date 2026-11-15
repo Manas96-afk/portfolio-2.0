@@ -165,7 +165,7 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     // Track if we've signaled ready
     const hasSignaledReady = useRef(false);
     const frameCount = useRef(0);
-    const FRAMES_TO_WAIT = 5;
+    const FRAMES_TO_WAIT = 3;
 
     useFrame(() => {
         // Update room origin each frame so the paint shader knows where.

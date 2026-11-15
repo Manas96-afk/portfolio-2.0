@@ -301,6 +301,22 @@ export const PRELOAD_LOADER = [
     ...STUDIO_TEXTURES,
 ];
 
+// Positional audio URLs used by drei <PositionalAudio> (which suspends React via
+// useLoader(AudioLoader, url) on first mount). Preloaded so the FIRST entry into
+// any room doesn't stall while the ambient loop downloads and decodes.
+// Keep in sync with every url="/sounds/..." in src/components.
+export const POSITIONAL_AUDIO_LIST = [
+    '/sounds/uchyleniedrzwi.mp3',
+    '/sounds/otwarciedrzwi.mp3',
+    '/sounds/zamknieciedrzwi.mp3',
+    '/sounds/szummonitorow.mp3',
+    '/sounds/szummiasta.mp3',
+    '/sounds/papersound.mp3',
+    '/sounds/szummorza.mp3',
+    '/sounds/szumwiatru.mp3',
+    '/sounds/baloonpoop.mp3',
+];
+
 /**
  * Filters the preload list based on whether the device supports hover (desktop) 
  * or is a touch-only device (mobile/tablet).

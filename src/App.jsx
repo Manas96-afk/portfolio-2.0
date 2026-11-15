@@ -42,9 +42,10 @@ import {
   PRELOAD_LOADER,
   ABOUT_TEXTURES,
   IMAGE_ASSETS,
+  POSITIONAL_AUDIO_LIST,
   filterTexturesByDevice
 } from './config/texturePreloadList';
-import { TextureLoader } from 'three';
+import { TextureLoader, AudioLoader } from 'three';
 
 // Standard Browser-level Image Preloader (for <img> tags)
 const preloadBrowserImage = (path) => {
@@ -77,6 +78,20 @@ if (isLowEnd) {
   
   filteredAll.forEach(path => useTexture.preload(path));
   filteredLoader.forEach(path => useLoader.preload(TextureLoader, path));
+}
+
+// --- AUDIO PRELOAD (fixes first-entry stall) ---
+// drei's <PositionalAudio> calls useLoader(AudioLoader, url), which SUSPENDS React
+// until the file is fetched AND decoded. Warmup rooms skip audio (!isWarmup), so
+// without this the first entry into each room froze ~4s. useLoader.preload writes
+// to the exact same cache useLoader reads (same [loader, ...keys] key).
+// Door sounds are tiny and always needed; ambient loops (~7MB decoded) are skipped
+// on low-end devices, which keep the original lazy behaviour.
+const DOOR_AUDIO = POSITIONAL_AUDIO_LIST.filter(p => p.includes('drzwi'));
+const AMBIENT_AUDIO = POSITIONAL_AUDIO_LIST.filter(p => !p.includes('drzwi'));
+DOOR_AUDIO.forEach(url => useLoader.preload(AudioLoader, url));
+if (!isLowEnd) {
+  AMBIENT_AUDIO.forEach(url => useLoader.preload(AudioLoader, url));
 }
 
 const FONT_URL = 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff';
