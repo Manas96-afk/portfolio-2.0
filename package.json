@@ -11,7 +11,6 @@
     "gen:textures": "node scripts/gen-textures.mjs"
   },
   "dependencies": {
-    "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
     "@types/three": "^0.182.0",

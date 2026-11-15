@@ -14,7 +14,7 @@ import GlobalOverlay from './components/ui/GlobalOverlay';
 import ScreenReaderOverlay from './components/ui/ScreenReaderOverlay';
 import { useDocumentMeta } from './hooks/useDocumentMeta';
 import posthog from 'posthog-js';
-import { loadContentData } from './hooks/useData';
+import { loadContentData, preloadBrowserImage } from './hooks/useData';
 import { CORRIDOR_PALETTE } from './config/corridorPalette';
 
 // Initialize PostHog only if a key is configured (analytics optional)
@@ -46,13 +46,6 @@ import {
   filterTexturesByDevice
 } from './config/texturePreloadList';
 import { TextureLoader, AudioLoader } from 'three';
-
-// Standard Browser-level Image Preloader (for <img> tags)
-const preloadBrowserImage = (path) => {
-  if (typeof window === 'undefined') return;
-  const img = new Image();
-  img.src = path;
-};
 
 const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '');
 const isWeakCPU = typeof navigator.hardwareConcurrency !== 'undefined' && navigator.hardwareConcurrency <= 4;
@@ -93,8 +86,6 @@ DOOR_AUDIO.forEach(url => useLoader.preload(AudioLoader, url));
 if (!isLowEnd) {
   AMBIENT_AUDIO.forEach(url => useLoader.preload(AudioLoader, url));
 }
-
-const FONT_URL = 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff';
 
 // Helper component to handle global audio enable on interaction
 const GlobalAudioEnabler = () => {

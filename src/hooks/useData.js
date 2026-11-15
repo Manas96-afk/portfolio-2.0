@@ -18,7 +18,7 @@ import { GALLERY_PROJECTS, STUDIO_CONTENT, AWARDS } from '../data/content';
 const supportsHover = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
 
 // Preloader for ordinary HTML <img> sources (e.g. award thumbnails)
-const preloadBrowserImage = (path) => {
+export const preloadBrowserImage = (path) => {
     if (typeof window === 'undefined' || !path) return;
     const img = new Image();
     img.src = path;
