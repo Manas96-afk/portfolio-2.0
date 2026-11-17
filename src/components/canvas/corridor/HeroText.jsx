@@ -14,7 +14,7 @@ let hasPlayedDrawAnimation = false;
  * HeroText Component - Hand-drawn Style with Sketch Fonts
  * 
  * WOW Effects for Awwwards SOTD:
- * - portfolio in Rubik Scribble font (splits into letters during scroll)
+ * - MANAS in Rubik Scribble font (splits into letters during scroll)
  * - Creative developer in Cabin Sketch font (also splits)
  * - Floating micro-animations
  * - Parallax split effect
@@ -100,7 +100,7 @@ const HeroText = ({ position = [0, 0.3, 0] }) => {
 
         splitAmount.current = THREE.MathUtils.lerp(splitAmount.current, targetSplit.current, 0.08);
 
-        // Apply split to each letter of portfolio
+        // Apply split to each letter of MANAS
         letterRefs.current.forEach((ref, i) => {
             if (ref) {
                 // Ensure opacity is 1
@@ -134,7 +134,7 @@ const HeroText = ({ position = [0, 0.3, 0] }) => {
 
     return (
         <group ref={groupRef} position={position} scale={[scale, scale, 1]}>
-            {/* portfolio Letters - Rubik Scribble font with fade-in animation */}
+            {/* MANAS Letters - Rubik Scribble font with fade-in animation */}
             {letters.map((letter, i) => (
                 <Text
                     key={`letter-${i}`}

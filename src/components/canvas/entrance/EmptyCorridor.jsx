@@ -8,7 +8,7 @@ import { CORRIDOR_PALETTE } from '../../../config/corridorPalette';
  * EmptyCorridor Component
  * 
  * Simple corridor walls for loading phase.
- * No doors, no decorations, no portfolio - just the corridor structure.
+ * No doors, no decorations, no hero text - just the corridor structure.
  * Used during preloader auto-scroll.
  */
 const EmptyCorridor = ({ camera }) => {

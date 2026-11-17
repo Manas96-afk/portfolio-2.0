@@ -65,7 +65,7 @@ const DOORS = [
  * CorridorSegment Component
  * 
  * A single repeatable chunk of the infinite corridor.
- * Each segment contains: walls, avatar, portfolio text, doors, decorations.
+ * Each segment contains: walls, avatar, hero text, doors, decorations.
  * 
  * Segment length: 80 units
  * Positioned based on segmentIndex * segmentLength
@@ -130,7 +130,7 @@ const CorridorSegment = ({
 
             {/* === WELCOME AREA (Start of segment) - MOVED CLOSER === */}
             <group position={[0, 0, zOffset - 2]}>
-                {/* portfolio Text - centered (portfolio letters adjusted internally) */}
+                {/* Hero text - centered (letters adjusted internally) */}
                 <HeroText position={[0, -0.1, -0.5]} />
 
                 {/* Avatar - center */}
