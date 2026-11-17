@@ -266,9 +266,6 @@ export const STUDIO_TEXTURES = [
     '/textures/studio/slimtv_left_painted.webp',
     '/textures/studio/slimtv_right.webp',
     '/textures/studio/slimtv_right_painted.webp',
-    // Phone portrait crops (studio project reels)
-    '/projects/pink-bmw-phone.webp',
-    '/projects/pink-bmw-phone_painted.webp',
     // Custom content front textures
     '/textures/studio/monitorfront_postnafbdoublewinner.webp',
     '/textures/studio/monitorfront_postnafbdoublewinner_painted.webp',
@@ -278,6 +275,15 @@ export const STUDIO_TEXTURES = [
     '/textures/studio/tvfront_filmikedytowaniezdjec_painted.webp',
     '/textures/studio/tvfront_filmikprojektdlamultiego.webp',
     '/textures/studio/tvfront_filmikprojektdlamultiego_painted.webp',
+    // Device fronts with the project photo inside the screen (see scripts/gen-device-fronts.mjs)
+    '/textures/studio/tvfront_gtacars.webp',
+    '/textures/studio/tvfront_gtacars_painted.webp',
+    '/textures/studio/monitorfront_macbook.webp',
+    '/textures/studio/monitorfront_macbook_painted.webp',
+    '/textures/studio/phonefront_pinkbmw.webp',
+    '/textures/studio/phonefront_pinkbmw_painted.webp',
+    '/textures/studio/slimtvfront_onbeat.webp',
+    '/textures/studio/slimtvfront_onbeat_painted.webp',
 ];
 
 // ============================================

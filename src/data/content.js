@@ -99,6 +99,9 @@ export const GALLERY_PROJECTS = [
 
 // ============================================
 // STUDIO — YouTube content (shown on monitor tower)
+// frontTexture = the whole device front (bezel + photo inside the screen),
+// not a bare photo. After swapping a photo in public/projects, rebuild with:
+//   node scripts/gen-device-fronts.mjs
 // ============================================
 export const STUDIO_CONTENT = [
     {
@@ -107,8 +110,8 @@ export const STUDIO_CONTENT = [
         device: 'tv', // Old chunky CRT TV
         title: 'G.O.A.T. Cars — Cinematic Edit',
         description: 'A high-octane cinematic car edit. Beat-synced cuts, screen shakes and impact FX.',
-        frontTexture: '/projects/gta-cars.webp',
-        paintedFrontTexture: '/projects/gta-cars_painted.webp',
+        frontTexture: '/textures/studio/tvfront_gtacars.webp',
+        paintedFrontTexture: '/textures/studio/tvfront_gtacars_painted.webp',
         thumbnail: null,
         url: 'https://www.youtube.com/@cnomo_editz',
         date: '2025-11-02',
@@ -121,8 +124,8 @@ export const STUDIO_CONTENT = [
         device: 'monitor', // Desktop editing monitor
         title: 'Cooked a MacBook — VFX Breakdown',
         description: 'A comedic VFX short. Practical comedy meets motion graphics and custom sound design.',
-        frontTexture: '/projects/macbook.webp',
-        paintedFrontTexture: '/projects/macbook_painted.webp',
+        frontTexture: '/textures/studio/monitorfront_macbook.webp',
+        paintedFrontTexture: '/textures/studio/monitorfront_macbook_painted.webp',
         thumbnail: null,
         url: 'https://www.youtube.com/@cnomo_editz',
         date: '2025-09-18',
@@ -135,8 +138,8 @@ export const STUDIO_CONTENT = [
         device: 'phone', // Vertical phone (portrait crop fits the reel format)
         title: 'Pink Kitty BMW — Reel',
         description: 'Colour-graded automotive reel with 10-bit log footage and a custom LUT.',
-        frontTexture: '/projects/pink-bmw-phone.webp',
-        paintedFrontTexture: '/projects/pink-bmw-phone_painted.webp',
+        frontTexture: '/textures/studio/phonefront_pinkbmw.webp',
+        paintedFrontTexture: '/textures/studio/phonefront_pinkbmw_painted.webp',
         thumbnail: null,
         url: 'https://www.youtube.com/@cnomo_editz',
         date: '2025-07-21',
@@ -149,8 +152,8 @@ export const STUDIO_CONTENT = [
         device: 'slimtv', // Slim flat TV (custom shape)
         title: 'Say The Word — On Beat Edit',
         description: 'Frame-accurate beat sync edit. Every cut lands exactly on the transient.',
-        frontTexture: '/projects/on-beat.webp',
-        paintedFrontTexture: '/projects/on-beat_painted.webp',
+        frontTexture: '/textures/studio/slimtvfront_onbeat.webp',
+        paintedFrontTexture: '/textures/studio/slimtvfront_onbeat_painted.webp',
         thumbnail: null,
         url: 'https://www.youtube.com/@cnomo_editz',
         date: '2025-06-05',

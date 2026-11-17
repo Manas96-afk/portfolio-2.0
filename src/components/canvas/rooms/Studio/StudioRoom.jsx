@@ -619,6 +619,22 @@ const StudioRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
 // MONITOR BLOCK COMPONENT - with Paint Reveal on Hover
 // Uses proven two-box approach: painted box behind + sketch box with revealMaterial in front
 // ===========================================
+
+// Center-crop a texture so it fills a face of the given aspect without
+// stretching (object-fit: cover). Textures are cached by URL and shared with
+// other rooms, so clone before touching repeat/offset — the clone shares the
+// decoded image and GPU upload, so it costs no extra memory.
+const fitTextureToFace = (tex, faceAspect) => {
+    if (!tex?.image?.width || !tex.image.height) return tex;
+    const fitted = tex.clone();
+    const imgAspect = fitted.image.width / fitted.image.height;
+    const w = imgAspect > faceAspect ? faceAspect / imgAspect : 1;
+    const h = imgAspect > faceAspect ? 1 : imgAspect / faceAspect;
+    fitted.repeat.set(w, h);
+    fitted.offset.set((1 - w) / 2, (1 - h) / 2);
+    return fitted;
+};
+
 const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled, paintOnBeforeCompile, paintUniforms }) => {
     // Position.y is updated directly by parent's useFrame via meshRef
     const paintedBoxRef = useRef();
@@ -662,6 +678,19 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
     // Load dynamic front texture
     const frontTex = useLoader(TextureLoader, frontTextureUrl);
     const frontPaintedTex = useLoader(TextureLoader, paintedFrontTextureUrl);
+
+    // Photos have their own aspect ratio, the screen face has another: fit the
+    // photo to the screen (cover-crop, centred) so it is never stretched.
+    // Default shell fronts are hand-drawn for their own face — leave them alone.
+    const faceAspect = item.width / item.height;
+    const fittedFrontTex = useMemo(
+        () => (item.frontTexture ? fitTextureToFace(frontTex, faceAspect) : frontTex),
+        [frontTex, faceAspect, item.frontTexture]
+    );
+    const fittedFrontPaintedTex = useMemo(
+        () => (item.paintedFrontTexture ? fitTextureToFace(frontPaintedTex, faceAspect) : frontPaintedTex),
+        [frontPaintedTex, faceAspect, item.paintedFrontTexture]
+    );
 
     // Load Monitor textures (Blog) - shell + painted
     const monitorBack = useLoader(TextureLoader, '/textures/studio/monitor_back.webp');
@@ -713,7 +742,7 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
                 { sketch: monitorLeft, painted: monitorLeftPainted },      // -X
                 { sketch: monitorTop, painted: monitorTopPainted },        // +Y
                 { sketch: monitorBottom, painted: monitorBottomPainted },  // -Y
-                { sketch: frontTex, painted: frontPaintedTex, isFront: true }, // +Z front
+                { sketch: fittedFrontTex, painted: fittedFrontPaintedTex, isFront: true }, // +Z front
                 { sketch: monitorBack, painted: monitorBackPainted },      // -Z
             ];
         } else if (isTvMonitor) {
@@ -722,7 +751,7 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
                 { sketch: tvSide, painted: tvSidePainted },       // -X
                 { sketch: tvTop, painted: tvTopPainted },          // +Y
                 { sketch: tvBottom, painted: tvBottomPainted },    // -Y
-                { sketch: frontTex, painted: frontPaintedTex, isFront: true }, // +Z front
+                { sketch: fittedFrontTex, painted: fittedFrontPaintedTex, isFront: true }, // +Z front
                 { sketch: tvBack, painted: tvBackPainted },        // -Z
             ];
         } else if (isPhoneMonitor) {
@@ -731,7 +760,7 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
                 { sketch: phoneSide, painted: phoneSidePainted },  // -X
                 { sketch: phoneSide, painted: phoneSidePainted },  // +Y
                 { sketch: phoneSide, painted: phoneSidePainted },  // -Y
-                { sketch: frontTex, painted: frontPaintedTex, isFront: true }, // +Z front
+                { sketch: fittedFrontTex, painted: fittedFrontPaintedTex, isFront: true }, // +Z front
                 { sketch: phoneBack, painted: phoneBackPainted },  // -Z
             ];
         } else if (isSlimTvMonitor) {
@@ -740,14 +769,14 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
                 { sketch: slimtvLeft, painted: slimtvLeftPainted },   // -X
                 { sketch: slimtvTop, painted: slimtvTopPainted },     // +Y
                 { sketch: slimtvBottom, painted: slimtvBottomPainted }, // -Y
-                { sketch: frontTex, painted: frontPaintedTex, isFront: true }, // +Z front
+                { sketch: fittedFrontTex, painted: fittedFrontPaintedTex, isFront: true }, // +Z front
                 { sketch: slimtvBack, painted: slimtvBackPainted },   // -Z
             ];
         }
         return null;
     }, [
         isBlogMonitor, isTvMonitor, isPhoneMonitor, isSlimTvMonitor,
-        frontTex, frontPaintedTex,
+        fittedFrontTex, fittedFrontPaintedTex,
         monitorBack, monitorTop, monitorBottom, monitorLeft, monitorRight,
         monitorBackPainted, monitorTopPainted, monitorBottomPainted, monitorLeftPainted, monitorRightPainted,
         tvBack, tvTop, tvBottom, tvSide,
