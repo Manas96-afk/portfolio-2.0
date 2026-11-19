@@ -870,16 +870,27 @@ const JourneyMilestone = ({ z, scrollProgressRef }) => {
                         side={THREE.DoubleSide}
                     />
                 </mesh>
-                {/* NAPIS NA WYSPIE (UO) - EDYTUJ TUTAJ */}
+                {/* Big island label (replaces baked "UO" text in the texture) */}
                 <Text
-                    position={[0.1, -0.85, 0.1]} // POZYCJA (X, Y, Z)
-                    fontSize={0.4}           // WIELKOŚĆ
+                    position={[0, 1, 0.1]}
+                    fontSize={0.65}
                     color="#1a1a1a"
                     anchorX="center"
                     anchorY="middle"
                     font="/fonts/CabinSketch-Bold.ttf"
                 >
-                    2025-NOW
+                    DATA ANALYST
+                </Text>
+                {/* Sign text */}
+                <Text
+                    position={[0.1, -0.85, 0.1]}
+                    fontSize={0.4}
+                    color="#1a1a1a"
+                    anchorX="center"
+                    anchorY="middle"
+                    font="/fonts/CabinSketch-Bold.ttf"
+                >
+                    2025
                 </Text>
             </group>
 
@@ -893,16 +904,27 @@ const JourneyMilestone = ({ z, scrollProgressRef }) => {
                         side={THREE.DoubleSide}
                     />
                 </mesh>
-                {/* NAPIS NA WYSPIE (Freelance) - EDYTUJ TUTAJ */}
+                {/* Big island label (replaces baked "FREELANCE" text in the texture) */}
                 <Text
-                    position={[0, -0.65, 0.1]} // POZYCJA (X, Y, Z)
-                    fontSize={0.5}           // WIELKOŚĆ
+                    position={[0, 1, 0.1]}
+                    fontSize={1.1}
                     color="#1a1a1a"
                     anchorX="center"
                     anchorY="middle"
                     font="/fonts/CabinSketch-Bold.ttf"
                 >
-                    2023-NOW
+                    EDITOR
+                </Text>
+                {/* Sign text */}
+                <Text
+                    position={[0, -0.65, 0.1]}
+                    fontSize={0.5}
+                    color="#1a1a1a"
+                    anchorX="center"
+                    anchorY="middle"
+                    font="/fonts/CabinSketch-Bold.ttf"
+                >
+                    2023
                 </Text>
             </group>
         </group>
