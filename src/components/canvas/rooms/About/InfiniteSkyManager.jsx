@@ -758,6 +758,29 @@ const AwardsMilestone = ({ z, scrollProgressRef }) => {
  * JOURNEY Milestone - Floating Islands
  * UO Island (left) and Freelance Island (right) floating in clouds
  */
+// troika <Text> is flat (no extrusion) — stack copies stepping back in z and
+// down-right so the words read as 3D block letters even when viewed head-on.
+const DepthText = ({ children, layers = 5, depth = 0.04, position, fontSize, ...rest }) => (
+    <>
+        {Array.from({ length: layers }, (_, i) => {
+            const t = layers > 1 ? i / (layers - 1) : 0; // 0 = face, 1 = deepest
+            return (
+                <Text
+                    key={i}
+                    {...rest}
+                    position={[
+                        position[0] + t * fontSize * 0.16,
+                        position[1] - t * fontSize * 0.16,
+                        position[2] - t * depth,
+                    ]}
+                >
+                    {children}
+                </Text>
+            );
+        })}
+    </>
+);
+
 const JourneyMilestone = ({ z, scrollProgressRef }) => {
     const { camera, viewport } = useThree();
     const isTouch = isTouchDevice();
@@ -871,16 +894,17 @@ const JourneyMilestone = ({ z, scrollProgressRef }) => {
                     />
                 </mesh>
                 {/* Big island label (replaces baked "UO" text in the texture) */}
-                <Text
-                    position={[0, 1, 0.1]}
+                <DepthText
+                    position={[0, 1, 0.6]}
                     fontSize={0.65}
+                    depth={0.1}
                     color="#1a1a1a"
                     anchorX="center"
                     anchorY="middle"
                     font="/fonts/CabinSketch-Bold.ttf"
                 >
                     DATA ANALYST
-                </Text>
+                </DepthText>
                 {/* Sign text */}
                 <Text
                     position={[0.1, -0.85, 0.1]}
@@ -905,16 +929,17 @@ const JourneyMilestone = ({ z, scrollProgressRef }) => {
                     />
                 </mesh>
                 {/* Big island label (replaces baked "FREELANCE" text in the texture) */}
-                <Text
-                    position={[0, 1, 0.1]}
+                <DepthText
+                    position={[0, 1, 0.06]}
                     fontSize={1.1}
+                    depth={0.05}
                     color="#1a1a1a"
                     anchorX="center"
                     anchorY="middle"
                     font="/fonts/CabinSketch-Bold.ttf"
                 >
                     EDITOR
-                </Text>
+                </DepthText>
                 {/* Sign text */}
                 <Text
                     position={[0, -0.65, 0.1]}
