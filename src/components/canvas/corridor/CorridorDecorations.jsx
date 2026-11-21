@@ -29,7 +29,7 @@ const tempQuat = new THREE.Quaternion();
 
 const CABIN_SKETCH_URL = '/fonts/CabinSketch-Regular.ttf';
 
-const PictureContent = ({ imagePath, imagePaintedPath, width, height, isPainted }) => {
+const PictureContent = ({ imagePath, imagePaintedPath, width, height, isPainted, tint = CORRIDOR_PALETTE.propPink }) => {
     const texture = useTexture(imagePath);
     // Render nothing if no painted path, but we still call the hook unconditionally to respect hook rules
     const paintedTexture = useTexture(imagePaintedPath || imagePath);
@@ -73,7 +73,7 @@ const PictureContent = ({ imagePath, imagePaintedPath, width, height, isPainted 
             <mesh position={[0, 0, 0]}>
                 <planeGeometry args={[width, height]} />
                 {imagePaintedPath ? (
-                    <revealMaterial color={CORRIDOR_PALETTE.propPink}
+                    <revealMaterial color={tint}
                         ref={materialRef}
                         map={texture}
                         transparent={true}
@@ -83,7 +83,7 @@ const PictureContent = ({ imagePath, imagePaintedPath, width, height, isPainted 
                         uProgress={0.0}
                     />
                 ) : (
-                    <meshBasicMaterial color={CORRIDOR_PALETTE.propPink}
+                    <meshBasicMaterial color={tint}
                         map={texture}
                         transparent={true}
                         alphaTest={0.1} // KLUCZOWE: Naprawia przezroczystość (wycina tło)
@@ -295,6 +295,7 @@ const InspectableFrame = ({ frame, wallX, frameTexture, framePaintedTexture, CAB
                     width={frame.imageWidth || frame.width * 0.7}
                     height={frame.imageHeight || frame.height * 0.7}
                     isPainted={isHovered || isInspected}
+                    tint={frame.imageTint}
                 />
             )}
 
@@ -382,8 +383,9 @@ const CorridorDecorations = ({ segmentLength, zOffset, corridorWidth = 4, corrid
             id: 'frame-1',
             // Custom setup for "rysuneknaobraz1.png"
             image: '/textures/corridor/rysuneknaobraz1.webp',
-            imageWidth: 1.1,
-            imageHeight: 1.1,
+            imageWidth: 1.4885,        // przycięty art (1192x784) dopasowany do wysokości otwarcia ramki
+            imageHeight: 0.979,
+            imageTint: '#ffffff',      // bez różowego filtra na tym zdjęciu
             offsetFromWall: 0.1, // Przesunięcie bliżej środka korytarza (0.1 unit)
         },
         {
