@@ -203,8 +203,10 @@ const InspectableFrame = ({ frame, wallX, frameTexture, framePaintedTexture, CAB
             tempRot.copy(camera.quaternion);
 
             // Efekt "3D Karty" na podstawie myszki
-            const tiltX = -state.pointer.y * 0.3;
-            const tiltY = state.pointer.x * 0.3;
+            // Na touch state.pointer zostaje w miejscu ostatniego tapu
+            // (albo zmienia się przy swipe) — stałego przechyłu nie chcemy.
+            const tiltX = isMobile ? 0 : -state.pointer.y * 0.3;
+            const tiltY = isMobile ? 0 : state.pointer.x * 0.3;
             tempEuler.set(tiltX, tiltY, 0);
             tempQuat.setFromEuler(tempEuler);
 
@@ -237,7 +239,6 @@ const InspectableFrame = ({ frame, wallX, frameTexture, framePaintedTexture, CAB
                 position={[0, 0, 0.05]}
                 onClick={(e) => {
                     e.stopPropagation();
-                    if (isMobile) return; // Całkowite wyłączenie na mobile
                     setIsInspected((prev) => {
                         const next = !prev;
                         if (setCameraOverride) setCameraOverride(next); // Blokowanie / odblokowanie poruszania kamerą
@@ -260,18 +261,16 @@ const InspectableFrame = ({ frame, wallX, frameTexture, framePaintedTexture, CAB
             </mesh>
 
             {/* RAMKA PAINTED (behind sketch) */}
-            {!isTouch && (
-                <mesh ref={framePaintedRef} position={[0, 0, -0.001]} scale={[0.98, 0.98, 1]}>
-                    <planeGeometry args={[frame.width, frame.height]} />
-                    <meshBasicMaterial color="#e0e0e0"
-                        map={framePaintedTexture}
-                        transparent={true}
-                        alphaTest={0.5}
-                        side={THREE.DoubleSide}
-                        roughness={0.9}
-                    />
-                </mesh>
-            )}
+            <mesh ref={framePaintedRef} position={[0, 0, -0.001]} scale={[0.98, 0.98, 1]}>
+                <planeGeometry args={[frame.width, frame.height]} />
+                <meshBasicMaterial color="#e0e0e0"
+                    map={framePaintedTexture}
+                    transparent={true}
+                    alphaTest={0.5}
+                    side={THREE.DoubleSide}
+                    roughness={0.9}
+                />
+            </mesh>
 
             {/* RAMKA SKETCH OVERLAY (front) */}
             <mesh position={[0, 0, 0]}>

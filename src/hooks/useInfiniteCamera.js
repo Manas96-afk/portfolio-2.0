@@ -287,7 +287,11 @@ const useInfiniteCamera = ({
     }, [handleWheel, handleMouseMove, handleKeyDown, handleTouchStart, handleTouchMove, handleDeviceOrientation, requestGyroscopePermission]);
 
     // Main camera update loop
-    useFrame(() => {
+    useFrame((_state, delta) => {
+        // Frame-rate independent smoothing: identical at 60fps, but on low-fps
+        // phones the camera keeps up with the swipe target instead of trailing it.
+        const smooth = (k) => 1 - Math.pow(1 - k, Math.min(delta, 0.1) * 60);
+
         // If camera override is active, let external code control the camera
         if (cameraOverride.current) {
             return;
@@ -310,12 +314,12 @@ const useInfiniteCamera = ({
 
         // Smooth parallax - always update when parallax is enabled
         if (parallaxActive) {
-            const parallaxSmoothing = justEnabled.current ? 0.02 : smoothing * 0.8;
+            const parallaxSmoothing = smooth(justEnabled.current ? 0.02 : smoothing * 0.8);
             parallax.current.x = THREE.MathUtils.lerp(parallax.current.x, targetParallax.current.x, parallaxSmoothing);
             parallax.current.y = THREE.MathUtils.lerp(parallax.current.y, targetParallax.current.y, parallaxSmoothing);
 
             // Smooth swipe glance (mobile horizontal swipe)
-            swipeGlance.current = THREE.MathUtils.lerp(swipeGlance.current, targetSwipeGlance.current, 0.08);
+            swipeGlance.current = THREE.MathUtils.lerp(swipeGlance.current, targetSwipeGlance.current, smooth(0.08));
         }
 
         // After a bit, normal smoothing
@@ -326,7 +330,7 @@ const useInfiniteCamera = ({
         // Z movement and door glance - only when scroll is enabled
         if (scrollActive) {
             // Smooth Z movement
-            currentZ.current = THREE.MathUtils.lerp(currentZ.current, targetZ.current, smoothing);
+            currentZ.current = THREE.MathUtils.lerp(currentZ.current, targetZ.current, smooth(smoothing));
 
             // Auto-glance proximity check
             targetGlance.current = calculateGlance(currentZ.current, currentSegment.current);
@@ -334,7 +338,7 @@ const useInfiniteCamera = ({
             // Dynamic smoothing: slow to look (0.03), fast to release (0.08)
             // This stops the camera from "dragging" after passing the door
             const isReleasing = Math.abs(targetGlance.current) < Math.abs(glanceOffset.current);
-            const lerpSpeed = isReleasing ? 0.08 : 0.03;
+            const lerpSpeed = smooth(isReleasing ? 0.08 : 0.03);
 
             glanceOffset.current = THREE.MathUtils.lerp(glanceOffset.current, targetGlance.current, lerpSpeed);
 
