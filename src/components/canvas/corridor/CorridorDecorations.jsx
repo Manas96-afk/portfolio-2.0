@@ -141,7 +141,8 @@ const InspectableFrame = ({ frame, wallX, frameTexture, framePaintedTexture, CAB
     useEffect(() => {
         if (!frameMaterialRef.current) return;
 
-        const shouldBePainted = isHovered || isInspected;
+        // isTouchDevice() called inline: stable, and keeps the dep array honest
+        const shouldBePainted = isHovered || isInspected || isTouchDevice(); // touch: colored by default
 
         if (shouldBePainted) {
             if (hideDelayRef.current) hideDelayRef.current.kill();
@@ -177,7 +178,7 @@ const InspectableFrame = ({ frame, wallX, frameTexture, framePaintedTexture, CAB
         if (compileFramesRef.current < 2) {
             compileFramesRef.current++;
             if (compileFramesRef.current === 2) {
-                if (!isHovered && !isInspected && framePaintedRef.current) {
+                if (!isTouch && !isHovered && !isInspected && framePaintedRef.current) {
                     framePaintedRef.current.visible = false;
                 }
             }
@@ -325,10 +326,15 @@ const CorridorDecorations = ({ segmentLength, zOffset, corridorWidth = 4, corrid
     const floorY = -corridorHeight / 2;
     const ceilingY = corridorHeight / 2;
 
+    // Touch: the frame border shows its painted (colored) version by default,
+    // so the sketch overlay map is never needed there (swap for memory).
+    const isTouch = isTouchDevice();
+    const dummyTex = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
     // =============================================
     // TEKSTURY DEKORACJI
     // =============================================
-    const frameTexture = useTexture('/textures/corridor/ramkanazdjecieduza.webp');
+    const frameTexture = useTexture(isTouch ? dummyTex : '/textures/corridor/ramkanazdjecieduza.webp');
     const framePaintedTexture = useTexture('/textures/corridor/ramkanazdjecieduza_painted.webp');
     const standingFrameTexture = useTexture('/textures/corridor/ramkanazdjeciemala.webp');
     const treeTexture = useTexture('/textures/corridor/drzewkowdoniczce.webp');

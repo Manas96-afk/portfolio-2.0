@@ -14,7 +14,8 @@ import { GALLERY_PROJECTS, STUDIO_CONTENT, AWARDS } from '../data/content';
  * useAwards) so rooms and UI components work unchanged.
  */
 
-// Only load the heavier "painted" colour variants on hover-capable (desktop) devices
+// Hover-capable devices load both variants (sketch + painted); touch devices
+// only need the painted ones, which are the default artwork there
 const supportsHover = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
 
 // Preloader for ordinary HTML <img> sources (e.g. award thumbnails)
@@ -34,12 +35,13 @@ const cache = {
 // ---- Warm the texture / image caches eagerly ----
 // Gallery project cards (clothesline wall)
 cache.projects.forEach(p => {
-    if (p.front) {
+    // Fronts are only displayed on hover-capable devices (touch uses a dummy)
+    if (p.front && supportsHover) {
         useTexture.preload(p.front);
         preloadBrowserImage(p.front);
     }
-    // Painted versions only on desktop (hover devices)
-    if (p.painted && supportsHover) {
+    // Painted versions are the default artwork on every device
+    if (p.painted) {
         useTexture.preload(p.painted);
         preloadBrowserImage(p.painted);
     }
@@ -47,11 +49,12 @@ cache.projects.forEach(p => {
 
 // Studio monitors
 cache.content.forEach(c => {
-    if (c.frontTexture) {
+    // Sketch fronts are only displayed on hover-capable devices
+    if (c.frontTexture && supportsHover) {
         useLoader.preload(TextureLoader, c.frontTexture);
         preloadBrowserImage(c.frontTexture);
     }
-    if (c.paintedFrontTexture && supportsHover) {
+    if (c.paintedFrontTexture) {
         useLoader.preload(TextureLoader, c.paintedFrontTexture);
         preloadBrowserImage(c.paintedFrontTexture);
     }

@@ -13,6 +13,11 @@ export const ENTRANCE_TEXTURES = [
     '/textures/doors/door_right_sketch.webp',
     '/textures/doors/handle_left_sketch.webp',
     '/textures/doors/handle_right_sketch.webp',
+    // Painted (colored) entrance doors — touch devices show these by default
+    '/textures/doors/door_right_painted.webp',
+    '/textures/doors/door_left_painted.webp',
+    '/textures/doors/handle_left_painted.webp',
+    '/textures/doors/handle_right_painted.webp',
     '/textures/doors/door_back_left_sketch.webp',
     '/textures/doors/pien.webp',
     // Environment
@@ -327,7 +332,8 @@ export const POSITIONAL_AUDIO_LIST = [
  * Filters the preload list based on whether the device supports hover (desktop) 
  * or is a touch-only device (mobile/tablet).
  * @param {string[]} list The list of texture paths to filter
- * @param {boolean} usePainted Whether to prioritize _painted versions
+ * @param {boolean} usePainted true = desktop: keep the standard texture as well (both layers need it);
+ *                             false = touch: only the painted version is preloaded
  * @returns {string[]} The filtered list
  */
 export const filterTexturesByDevice = (list, usePainted) => {
@@ -351,15 +357,19 @@ export const filterTexturesByDevice = (list, usePainted) => {
             // Check if this standard path HAS a painted version in the list
             const pVersion = path.replace('.webp', '_painted.webp');
             const css3Version = path.replace('csslogo.webp', 'css3logo_painted.webp');
-            if (list.includes(pVersion) || (path.includes('csslogo.webp') && hasCss3Painted)) {
-                // Return true to keep the standard version! Both desktop and mobile need it.
-                return true; 
+            // "X_sketch.webp" pairs with "X_painted.webp" (entrance doors)
+            const sketchPaired = path.endsWith('_sketch.webp') && list.includes(path.replace('_sketch.webp', '_painted.webp'));
+            if (list.includes(pVersion) || (path.includes('csslogo.webp') && hasCss3Painted) || sketchPaired) {
+                // Paired texture: desktop preloads BOTH versions, touch devices
+                // show the painted state by default and skip the standard one
+                // (components still fetch it lazily if a fallback needs it).
+                return usePainted;
             }
             // If it doesn't have a painted version, it's a static texture (always keep)
             return true;
         }
 
-        // It's a painted version
-        return usePainted;
+        // Painted version: every device needs it now (touch shows painted by default)
+        return true;
     });
 };

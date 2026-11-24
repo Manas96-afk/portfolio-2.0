@@ -105,7 +105,7 @@ const AwardButton = ({ onClick, texture, paintedTexture, width, height, position
                 <meshBasicMaterial color="#e0e0e0"
                     map={paintedTexture}
                     transparent
-                    opacity={0}
+                    opacity={isTouch ? 1 : 0}
                     side={THREE.DoubleSide}
                     alphaTest={0.5}
                     depthWrite={false}
@@ -125,7 +125,7 @@ const AwardButton = ({ onClick, texture, paintedTexture, width, height, position
                     side={THREE.DoubleSide}
                     alphaTest={0.1}
                     depthWrite={false}
-                    uProgress={0.0}
+                    uProgress={isTouch ? 1 : 0}
                 />
             </mesh>
             <Text
@@ -441,14 +441,17 @@ const AwardsMilestone = ({ z, scrollProgressRef }) => {
     const sotyHideDelayRef = useRef();
 
     // Load textures
-    const sotyTexture = useLoader(THREE.TextureLoader, '/textures/about/SOTY.webp');
-    const sotdTexture = useLoader(THREE.TextureLoader, '/textures/about/SOTD.webp');
-    const sotmTexture = useLoader(THREE.TextureLoader, '/textures/about/SOTM.webp');
-    const sotyPaintedTexture = useLoader(THREE.TextureLoader, isTouch ? '/textures/about/SOTY.webp' : '/textures/about/SOTY_painted.webp');
-    const sotdPaintedTexture = useLoader(THREE.TextureLoader, isTouch ? '/textures/about/SOTD.webp' : '/textures/about/SOTD_painted.webp');
-    const sotmPaintedTexture = useLoader(THREE.TextureLoader, isTouch ? '/textures/about/SOTM.webp' : '/textures/about/SOTM_painted.webp');
-    const buttonTexture = useLoader(THREE.TextureLoader, '/textures/about/button.webp');
-    const buttonPaintedTexture = useLoader(THREE.TextureLoader, isTouch ? '/textures/about/button.webp' : '/textures/about/button_painted.webp');
+    // Touch devices show the painted (colored) state by default — the sketch
+    // overlay is fully discarded there, so only the painted texture is loaded.
+    const dummyTex = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    const sotyTexture = useLoader(THREE.TextureLoader, isTouch ? dummyTex : '/textures/about/SOTY.webp');
+    const sotdTexture = useLoader(THREE.TextureLoader, isTouch ? dummyTex : '/textures/about/SOTD.webp');
+    const sotmTexture = useLoader(THREE.TextureLoader, isTouch ? dummyTex : '/textures/about/SOTM.webp');
+    const sotyPaintedTexture = useLoader(THREE.TextureLoader, '/textures/about/SOTY_painted.webp');
+    const sotdPaintedTexture = useLoader(THREE.TextureLoader, '/textures/about/SOTD_painted.webp');
+    const sotmPaintedTexture = useLoader(THREE.TextureLoader, '/textures/about/SOTM_painted.webp');
+    const buttonTexture = useLoader(THREE.TextureLoader, isTouch ? dummyTex : '/textures/about/button.webp');
+    const buttonPaintedTexture = useLoader(THREE.TextureLoader, '/textures/about/button_painted.webp');
 
     // Color space fix
     sotyTexture.colorSpace = THREE.SRGBColorSpace;
@@ -577,7 +580,7 @@ const AwardsMilestone = ({ z, scrollProgressRef }) => {
                     <meshBasicMaterial color="#e0e0e0"
                         map={sotdPaintedTexture}
                         transparent
-                        opacity={0}
+                        opacity={isTouch ? 1 : 0}
                         side={THREE.DoubleSide}
                         alphaTest={0.5}
                     />
@@ -590,7 +593,7 @@ const AwardsMilestone = ({ z, scrollProgressRef }) => {
                         map={sotdTexture}
                         transparent
                         side={THREE.DoubleSide}
-                        uProgress={0.0}
+                        uProgress={isTouch ? 1 : 0}
                     />
                 </mesh>
                 {/* BUTTON */}
@@ -638,7 +641,7 @@ const AwardsMilestone = ({ z, scrollProgressRef }) => {
                     <meshBasicMaterial color="#e0e0e0"
                         map={sotmPaintedTexture}
                         transparent
-                        opacity={0}
+                        opacity={isTouch ? 1 : 0}
                         side={THREE.DoubleSide}
                         alphaTest={0.5}
                     />
@@ -651,7 +654,7 @@ const AwardsMilestone = ({ z, scrollProgressRef }) => {
                         map={sotmTexture}
                         transparent
                         side={THREE.DoubleSide}
-                        uProgress={0.0}
+                        uProgress={isTouch ? 1 : 0}
                     />
                 </mesh>
                 {/* BUTTON */}
@@ -699,7 +702,7 @@ const AwardsMilestone = ({ z, scrollProgressRef }) => {
                     <meshBasicMaterial color="#e0e0e0"
                         map={sotyPaintedTexture}
                         transparent
-                        opacity={0}
+                        opacity={isTouch ? 1 : 0}
                         side={THREE.DoubleSide}
                         alphaTest={0.5}
                     />
@@ -712,6 +715,7 @@ const AwardsMilestone = ({ z, scrollProgressRef }) => {
                         map={sotyTexture}
                         transparent
                         side={THREE.DoubleSide}
+                        uProgress={isTouch ? 1 : 0}
                     />
                 </mesh>
                 {/* BUTTON */}
@@ -990,9 +994,11 @@ const SIZE_MULTIPLIERS = {
 const SkillBalloon = ({ config, revealFactorRef, spreadFactorRef, timeRef }) => {
     const { viewport } = useThree();
     const isTouch = isTouchDevice();
-    const texture = useLoader(THREE.TextureLoader, config.texture);
-    const paintedTextureUrl = isTouch ? config.texture : config.paintedTexture;
-    const paintedTexture = useLoader(THREE.TextureLoader, paintedTextureUrl);
+    // Touch shows the painted balloon by default — the sketch overlay is fully
+    // discarded there, so only the painted texture is fetched.
+    const dummyTex = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    const texture = useLoader(THREE.TextureLoader, isTouch ? dummyTex : config.texture);
+    const paintedTexture = useLoader(THREE.TextureLoader, config.paintedTexture);
     texture.colorSpace = THREE.SRGBColorSpace;
     paintedTexture.colorSpace = THREE.SRGBColorSpace;
 
@@ -1149,10 +1155,10 @@ const SkillBalloon = ({ config, revealFactorRef, spreadFactorRef, timeRef }) => 
                 // Immediately reset opacities to prevent flashing
                 if (balloonRevealRef.current) balloonRevealRef.current.opacity = 1;
                 if (textRef.current) textRef.current.fillOpacity = 0;
-                // Reset reveal state on respawn
-                if (balloonRevealRef.current) balloonRevealRef.current.uProgress = 0;
-                if (paintedMatRef.current) paintedMatRef.current.opacity = 0;
-                if (paintedMeshRef.current) paintedMeshRef.current.visible = false;
+                // Reset reveal state on respawn (touch devices stay painted)
+                if (balloonRevealRef.current) balloonRevealRef.current.uProgress = isTouch ? 1 : 0;
+                if (paintedMatRef.current) paintedMatRef.current.opacity = isTouch ? 1 : 0;
+                if (paintedMeshRef.current) paintedMeshRef.current.visible = !isTouch;
             }
         }
 
@@ -1243,7 +1249,7 @@ const SkillBalloon = ({ config, revealFactorRef, spreadFactorRef, timeRef }) => 
                         ref={paintedMatRef}
                         map={paintedTexture}
                         transparent
-                        opacity={0}
+                        opacity={isTouch ? 1 : 0}
                         side={THREE.DoubleSide}
                         alphaTest={0.5}
                         depthWrite={false}
@@ -1279,7 +1285,7 @@ const SkillBalloon = ({ config, revealFactorRef, spreadFactorRef, timeRef }) => 
                         transparent
                         side={THREE.DoubleSide}
                         depthWrite={false}
-                        uProgress={0.0}
+                        uProgress={isTouch ? 1 : 0}
                     />
                 </mesh>
 

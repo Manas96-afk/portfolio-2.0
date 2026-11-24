@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { useScene } from '../../context/SceneContext';
 import { useAudio } from '../../context/AudioManager';
 import { setMusicVolume, getMusicVolume } from '../../utils/audioManager';
+import { isTouchDevice } from '../../utils/deviceDetect';
 import { useAchievements } from '../../context/AchievementsContext';
 import AchievementPopup from './AchievementPopup';
 import AchievementsPanel from './AchievementsPanel';
@@ -110,7 +111,8 @@ const NavigationUI = () => {
             const ref = paintedMapsRefs[zoneId]?.current;
             if (!ref) return;
             const isActive = activeZones.includes(zoneId);
-            const shouldOpen = isActive && (hoveredZone === zoneId || currentZone === zoneId);
+            // Touch has no hover: every active zone stays painted (colored) by default
+            const shouldOpen = isActive && (isTouchDevice() || hoveredZone === zoneId || currentZone === zoneId);
             gsap.to(ref, {
                 clipPath: shouldOpen ? paths.open : paths.closed,
                 duration: 0.5,

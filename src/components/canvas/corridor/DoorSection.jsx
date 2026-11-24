@@ -221,17 +221,16 @@ const DoorSection = ({
     }, [originalWallTexture]);
 
     // Load door textures - use the right texture based on label
-    const doorTexturePath = DOOR_TEXTURES[label] || DOOR_TEXTURES['THE GALLERY'];
-    const doorTexture = useTexture(doorTexturePath);
-
     const isTouch = isTouchDevice();
     const dummyTex = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    const doorTexturePath = DOOR_TEXTURES[label] || DOOR_TEXTURES['THE GALLERY'];
+    const doorTexture = useTexture(isTouch ? dummyTex : doorTexturePath);
 
     const doorPaintedTexturePath = DOOR_PAINTED_TEXTURES[label] || DOOR_PAINTED_TEXTURES['THE GALLERY'];
-    const doorPaintedTexture = useTexture(isTouch ? dummyTex : doorPaintedTexturePath);
+    const doorPaintedTexture = useTexture(doorPaintedTexturePath);
     const frameTexture = useTexture('/textures/corridor/doors/ramkasingledoors.webp');
-    const handleTexture = useTexture('/textures/corridor/doors/klamkadodrzwi.webp');
-    const handlePaintedTexture = useTexture(isTouch ? dummyTex : '/textures/corridor/doors/klamkadodrzwi_painted.webp');
+    const handleTexture = useTexture(isTouch ? dummyTex : '/textures/corridor/doors/klamkadodrzwi.webp');
+    const handlePaintedTexture = useTexture('/textures/corridor/doors/klamkadodrzwi_painted.webp');
     const doorBackTexture = useTexture('/textures/corridor/doors/backsingledoors.webp');
     const arrowTexture = useTexture('/textures/corridor/strzalka.webp');
 
@@ -330,7 +329,8 @@ const DoorSection = ({
         if (compileFramesRef.current < 2) {
             compileFramesRef.current++;
             if (compileFramesRef.current === 2) {
-                if (!isHovered && !isOpen) {
+                // Touch devices keep the painted door visible permanently
+                if (!isHovered && !isOpen && !isTouch) {
                     if (doorPaintedRef.current) doorPaintedRef.current.visible = false;
                     if (handlePaintedRef.current) handlePaintedRef.current.visible = false;
                 }
@@ -865,6 +865,7 @@ const DoorSection = ({
         // Hide painted layers after animation
         if (handleHideDelayRef.current) handleHideDelayRef.current.kill();
         handleHideDelayRef.current = gsap.delayedCall(0.65, () => {
+            if (isTouch) return; // painted stays the default look on touch
             if (handlePaintedRef.current) handlePaintedRef.current.visible = false;
             if (doorPaintedRef.current) doorPaintedRef.current.visible = false;
         });
@@ -988,6 +989,7 @@ const DoorSection = ({
 
         // Hide painted layers after reverse animation completes
         handleHideDelayRef.current = gsap.delayedCall(0.55, () => {
+            if (isTouch) return; // painted stays the default look on touch
             if (handlePaintedRef.current) handlePaintedRef.current.visible = false;
             if (doorPaintedRef.current) doorPaintedRef.current.visible = false;
         });

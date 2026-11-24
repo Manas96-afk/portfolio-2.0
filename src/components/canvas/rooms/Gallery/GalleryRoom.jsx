@@ -19,6 +19,10 @@ import { CORRIDOR_PALETTE } from '../../../../config/corridorPalette';
 // Reusable Vector3 to avoid allocations in useFrame
 const _tempScale = new THREE.Vector3();
 
+// 1x1 transparent GIF — stands in for the B&W "front" texture on touch devices,
+// where that under-layer is never visible (the painted texture shows instead).
+const DUMMY_TEX = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
 // ============================================
 // ⚙️ AUDIO SETTINGS - TWEAK HERE
 // Edytuj te wartości, aby zmienić głośność i zasięg słyszalności szumu miasta
@@ -191,8 +195,9 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
     const RAILING_HEIGHT = 1.25; // Legacy ratio 20/(7 segments * 2.287)
 
     // --- TEXTURES AND RESPONSIVENESS ---
-    // User requested: painted on desktop, regular on touch/phones (even if laptop has touch screen)
-    // We use matchMedia('(hover: hover)') to detect devices with a cursor/hover capability
+    // Painted (colored) art is the DEFAULT on every device, including touch/hover-less ones.
+    // canHover only decides which files get fetched (fronts are swapped for a 1x1 dummy
+    // on touch) and drives the hover interactions — it no longer picks the artwork.
     const [canHover, setCanHover] = useState(() => typeof window !== 'undefined' ? window.matchMedia('(hover: hover)').matches : true);
 
     const activeProjects = useGalleryProjects() || FALLBACK_PROJECTS;
@@ -204,20 +209,21 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
         return () => mq.removeEventListener('change', handleHoverChange);
     }, []);
 
-    // Load all project front textures in a flat array
-    const textureUrls = activeProjects.map(p => p.front);
+    // Load all project front textures in a flat array.
+    // On touch the front is only ever the hidden under-layer of the 3D card,
+    // so those devices fetch a 1x1 dummy instead (desktop keeps the real fronts).
+    const textureUrls = activeProjects.map(p => (canHover ? p.front : DUMMY_TEX));
     const projectTextures = useTexture(textureUrls);
 
-    // Load painted textures only on desktop, fallback to front if mobile/touch
-    const paintedUrls = activeProjects.map(p => (canHover && p.painted) ? p.painted : p.front);
+    // Painted textures: loaded on ALL devices — touch shows the colored version by default
+    const paintedUrls = activeProjects.map(p => (p.painted || p.front));
     const paintedTextures = useTexture(paintedUrls);
 
-    // Load the universal back texture and the button texture conditionally
-    const backTextureRaw = useTexture(canHover ? '/textures/gallery/tylkartki_painted.webp' : '/textures/gallery/tylkartki.webp');
-    const overlayTextureRaw = useTexture(canHover ? '/textures/gallery/przyciskdotylukartki_painted.webp' : '/textures/gallery/przyciskdotylukartki.webp');
+    // Universal back + open-button textures (painted/colored on every device)
+    const backTextureRaw = useTexture('/textures/gallery/tylkartki_painted.webp');
+    const overlayTextureRaw = useTexture('/textures/gallery/przyciskdotylukartki_painted.webp');
 
-    // Preload tech stack logos to prevent stuttering on first flip
-    // We use the same conditional logic: painted on desktop, regular on touch
+    // Preload tech stack logos to prevent stuttering on first flip (painted versions everywhere)
     const allLogos = useMemo(() => {
         const names = [
             'csslogo', 'elementorlogo', 'firebaselogo', 'htmllogo',
@@ -225,11 +231,10 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
             'tailwindlogo', 'wordpresslogo'
         ];
         return names.map(name => {
-            if (!canHover) return `/textures/gallery/${name}.webp`;
             if (name === 'csslogo') return `/textures/gallery/css3logo_painted.webp`;
             return `/textures/gallery/${name}_painted.webp`;
         });
-    }, [canHover]);
+    }, []);
     
     useTexture(allLogos);
 
@@ -253,7 +258,6 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
             }
 
             const techStack = (projectData.techStack || []).map(path => {
-                if (!canHover) return path;
                 const name = path.split('/').pop().replace('.webp', '');
                 if (name === 'csslogo') return '/textures/gallery/css3logo_painted.webp';
                 return `/textures/gallery/${name}_painted.webp`;
@@ -263,13 +267,13 @@ const GalleryRoom = ({ showRoom, onReady, isExiting, isWarmup }) => {
                 ...projectData,
                 originalIndex: i,
                 frontTexture: frontTex,
-                paintedTexture: (paintedTex !== frontTex && canHover) ? paintedTex : null,
+                paintedTexture: (paintedTex !== frontTex) ? paintedTex : null,
                 backTexture: backTextureRaw,
                 buttonTexture: overlayTextureRaw,
                 techStack: techStack
             };
         });
-    }, [projectTextures, paintedTextures, backTextureRaw, overlayTextureRaw, activeProjects, canHover]);
+    }, [projectTextures, paintedTextures, backTextureRaw, overlayTextureRaw, activeProjects]);
 
     // 2. Construct the full list of projects with a truly randomized sequence per visit
     const projects = useMemo(() => {
@@ -729,8 +733,9 @@ const ProjectCard = memo(forwardRef(({ index, total, project, clothespinTexture,
                         setIsAnimating(false);
                         resolve();
 
-                        // Unpaint the card after it returns to the clothespin
-                        if (project.paintedTexture && materialRef.current) {
+                        // Unpaint the card after it returns to the clothespin.
+                        // Touch keeps the painted art — never tween it back to 0 there.
+                        if (!isMobile && project.paintedTexture && materialRef.current) {
                             gsap.to(materialRef.current, {
                                 uProgress: 0.0,
                                 duration: 0.5,
@@ -942,6 +947,13 @@ const ProjectCard = memo(forwardRef(({ index, total, project, clothespinTexture,
     useFrame((state) => {
         if (!cardRef.current) return;
 
+        // Touch shows the painted art by default: pin the brush reveal at 1.
+        // Shader recompiles reset uProgress to 0, so re-assert every frame;
+        // on touch no other code may lower it (hover handlers early-return).
+        if (isMobile && materialRef.current && materialRef.current.uProgress < 1) {
+            materialRef.current.uProgress = 1;
+        }
+
         // Custom GSAP Paint logic for texts
         // We delay the text reveal slightly so the card paints first (p > 0.4)
         if (textRef.current && paintProgress) {
@@ -1140,7 +1152,9 @@ const ProjectCard = memo(forwardRef(({ index, total, project, clothespinTexture,
                     <PaperMaterial
                         ref={materialRef}
                         color="#ffffff"
-                        map={project.frontTexture}
+                        // Touch: map the painted texture directly so the card is colored
+                        // from its very first rendered frame (front is a hidden dummy there)
+                        map={isMobile ? (project.paintedTexture || project.frontTexture) : project.frontTexture}
                         mapBack={project.backTexture}
                         mapPainted={project.paintedTexture}
                         side={THREE.DoubleSide}

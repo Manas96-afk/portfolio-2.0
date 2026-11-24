@@ -66,16 +66,20 @@ const EntranceDoors = ({
     const dummyTex = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
     const frameTexture = useTexture('/textures/doors/frame_sketch.webp');
-    const doorLeftTexture = useTexture('/textures/doors/door_left_sketch.webp');
-    const doorRightTexture = useTexture('/textures/doors/door_right_sketch.webp');
+    // Touch devices show the painted (colored) state by default — the sketch
+    // overlay is fully discarded there, so only the painted texture is loaded.
+    const doorLeftTexture = useTexture(isMobileDevice ? dummyTex : '/textures/doors/door_left_sketch.webp');
+    const doorRightTexture = useTexture(isMobileDevice ? dummyTex : '/textures/doors/door_right_sketch.webp');
 
-    // Mobile optimization: Don't load painted textures or handles on phones
-    const doorRightPaintedTexture = useTexture(isMobileDevice ? dummyTex : '/textures/doors/door_right_painted.webp');
-    const doorLeftPaintedTexture = useTexture(isMobileDevice ? dummyTex : '/textures/doors/door_left_painted.webp');
-    const handleLeftTexture = useTexture('/textures/doors/handle_left_sketch.webp');
-    const handleLeftPaintedTexture = useTexture(isMobileDevice ? dummyTex : '/textures/doors/handle_left_painted.webp');
-    const handleRightTexture = useTexture('/textures/doors/handle_right_sketch.webp');
-    const handleRightPaintedTexture = useTexture(isMobileDevice ? dummyTex : '/textures/doors/handle_right_painted.webp');
+    const doorRightPaintedTexture = useTexture('/textures/doors/door_right_painted.webp');
+    const doorLeftPaintedTexture = useTexture('/textures/doors/door_left_painted.webp');
+    const handleLeftTexture = useTexture(isMobileDevice ? dummyTex : '/textures/doors/handle_left_sketch.webp');
+    const handleLeftPaintedTexture = useTexture('/textures/doors/handle_left_painted.webp');
+    const handleRightTexture = useTexture(isMobileDevice ? dummyTex : '/textures/doors/handle_right_sketch.webp');
+    const handleRightPaintedTexture = useTexture('/textures/doors/handle_right_painted.webp');
+
+    // On touch/narrow screens the hover reveal never fires — start fully painted
+    const defaultReveal = isMobileDevice ? 1 : 0;
 
     // Dynamic textures for mobile
     const doorBackTexture = useTexture(isMobileDevice ? '/textures/doors/door_back.webp' : '/textures/doors/door_back_left_sketch.webp');
@@ -662,17 +666,15 @@ const EntranceDoors = ({
                 </mesh>
 
                 {/* Painted layer (behind sketch) - left door */}
-                {!isMobile && (
-                    <mesh position={[doorWidth / 2, 0, 0.088]}>
-                        <planeGeometry args={[doorWidth, doorHeight]} />
-                        <meshBasicMaterial color="#e0e0e0"
-                            map={doorLeftPaintedTexture}
-                            transparent={true}
-                            alphaTest={0.5}
-                            roughness={0.8}
-                        />
-                    </mesh>
-                )}
+                <mesh position={[doorWidth / 2, 0, 0.088]}>
+                    <planeGeometry args={[doorWidth, doorHeight]} />
+                    <meshBasicMaterial color="#e0e0e0"
+                        map={doorLeftPaintedTexture}
+                        transparent={true}
+                        alphaTest={0.5}
+                        roughness={0.8}
+                    />
+                </mesh>
 
                 {/* Sketch overlay (front) - left door brush-stroke reveal */}
                 <mesh position={[doorWidth / 2, 0, 0.09]}>
@@ -684,7 +686,7 @@ const EntranceDoors = ({
                         alphaTest={0.5}
                         roughness={0.8}
                         depthWrite={false}
-                        uProgress={0.0}
+                        uProgress={defaultReveal}
                     />
                 </mesh>
 
@@ -702,18 +704,16 @@ const EntranceDoors = ({
 
                 {/* Handle Layer (animated) - pivot at screw center (292,459 on 332x848 texture) */}
                 <group ref={leftHandleRef} position={[doorWidth / 2 + 0.357, -0.099, 0.10]}>
-                    {/* Painted handle (behind) - hidden until hover */}
-                    {!isMobile && (
-                        <mesh ref={leftHandlePaintedRef} position={[-0.357, 0.09, -0.001]} visible={false}>
-                            <planeGeometry args={[doorWidth, doorHeight]} />
-                            <meshBasicMaterial color="#e0e0e0"
-                                map={handleLeftPaintedTexture}
-                                transparent={true}
-                                alphaTest={0.5}
-                                depthWrite={false}
-                            />
-                        </mesh>
-                    )}
+                    {/* Painted handle (behind) - visible by default on touch */}
+                    <mesh ref={leftHandlePaintedRef} position={[-0.357, 0.09, -0.001]} visible={isMobileDevice}>
+                        <planeGeometry args={[doorWidth, doorHeight]} />
+                        <meshBasicMaterial color="#e0e0e0"
+                            map={handleLeftPaintedTexture}
+                            transparent={true}
+                            alphaTest={0.5}
+                            depthWrite={false}
+                        />
+                    </mesh>
                     {/* Sketch handle overlay (front) */}
                     <mesh position={[-0.357, 0.099, 0]}>
                         <planeGeometry args={[doorWidth, doorHeight]} />
@@ -723,7 +723,7 @@ const EntranceDoors = ({
                             transparent={true}
                             alphaTest={0.5}
                             depthWrite={false}
-                            uProgress={0.0}
+                            uProgress={defaultReveal}
                         />
                     </mesh>
                 </group>
@@ -743,17 +743,15 @@ const EntranceDoors = ({
                 </mesh>
 
                 {/* Painted layer (behind sketch) - revealed when sketch fades out on hover */}
-                {!isMobile && (
-                    <mesh position={[-doorWidth / 2, 0, 0.088]}>
-                        <planeGeometry args={[doorWidth, doorHeight]} />
-                        <meshBasicMaterial color="#e0e0e0"
-                            map={doorRightPaintedTexture}
-                            transparent={true}
-                            alphaTest={0.5}
-                            roughness={0.8}
-                        />
-                    </mesh>
-                )}
+                <mesh position={[-doorWidth / 2, 0, 0.088]}>
+                    <planeGeometry args={[doorWidth, doorHeight]} />
+                    <meshBasicMaterial color="#e0e0e0"
+                        map={doorRightPaintedTexture}
+                        transparent={true}
+                        alphaTest={0.5}
+                        roughness={0.8}
+                    />
+                </mesh>
 
                 {/* Sketch overlay (front) - brush-stroke discard reveals painted beneath */}
                 <mesh position={[-doorWidth / 2, 0, 0.09]}>
@@ -765,7 +763,7 @@ const EntranceDoors = ({
                         alphaTest={0.5}
                         roughness={0.8}
                         depthWrite={false}
-                        uProgress={0.0}
+                        uProgress={defaultReveal}
                     />
                 </mesh>
 
@@ -782,18 +780,16 @@ const EntranceDoors = ({
 
                 {/* Handle Layer (animated) - pivot at screw center (40,459 on 332x848 texture) */}
                 <group ref={rightHandleRef} position={[-doorWidth / 2 - 0.357, -0.099, 0.10]}>
-                    {/* Painted handle (behind) - hidden until hover */}
-                    {!isMobile && (
-                        <mesh ref={rightHandlePaintedRef} position={[0.357, 0.09, -0.001]} visible={false}>
-                            <planeGeometry args={[doorWidth, doorHeight]} />
-                            <meshBasicMaterial color="#e0e0e0"
-                                map={handleRightPaintedTexture}
-                                transparent={true}
-                                alphaTest={0.5}
-                                depthWrite={false}
-                            />
-                        </mesh>
-                    )}
+                    {/* Painted handle (behind) - visible by default on touch */}
+                    <mesh ref={rightHandlePaintedRef} position={[0.357, 0.09, -0.001]} visible={isMobileDevice}>
+                        <planeGeometry args={[doorWidth, doorHeight]} />
+                        <meshBasicMaterial color="#e0e0e0"
+                            map={handleRightPaintedTexture}
+                            transparent={true}
+                            alphaTest={0.5}
+                            depthWrite={false}
+                        />
+                    </mesh>
                     {/* Sketch handle overlay (front) */}
                     <mesh position={[0.357, 0.099, 0]}>
                         <planeGeometry args={[doorWidth, doorHeight]} />
@@ -803,7 +799,7 @@ const EntranceDoors = ({
                             transparent={true}
                             alphaTest={0.5}
                             depthWrite={false}
-                            uProgress={0.0}
+                            uProgress={defaultReveal}
                         />
                     </mesh>
                 </group>

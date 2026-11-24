@@ -19,10 +19,12 @@ const SocialBarrel = ({ position, rotation = [0, 0, 0], texturePath, label, onCl
     // Load texture based on prop. 
     // Note: If you change the texture on the fly, this might suspend. 
     // Ideally textures are preloaded or consistent.
-    const texture = useTexture(texturePath);
-    // Determine the painted texture path from the base texture path
+    // Touch shows the painted (colored) barrel by default — the sketch overlay
+    // is fully discarded there, so only the painted texture is fetched.
     const isTouch = isTouchDevice();
-    const paintedTexturePath = isTouch ? texturePath : texturePath.replace('.png', '_painted.png').replace('.webp', '_painted.webp');
+    const dummyTex = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    const texture = useTexture(isTouch ? dummyTex : texturePath);
+    const paintedTexturePath = texturePath.replace('.png', '_painted.png').replace('.webp', '_painted.webp');
     const texturePainted = useTexture(paintedTexturePath);
     const textRef = useRef();
 
@@ -112,8 +114,8 @@ const SocialBarrel = ({ position, rotation = [0, 0, 0], texturePath, label, onCl
             onPointerOver={handlePointerOver}
             onPointerOut={handlePointerOut}
         >
-            {/* Painted Layer (Behind) */}
-            <mesh ref={paintedRef} position={[0, 0, -0.001]} visible={false}>
+            {/* Painted Layer (Behind) — visible by default on touch */}
+            <mesh ref={paintedRef} position={[0, 0, -0.001]} visible={isTouch}>
                 <planeGeometry args={scale} />
                 <meshBasicMaterial color="#e0e0e0"
                     map={texturePainted}
@@ -133,7 +135,7 @@ const SocialBarrel = ({ position, rotation = [0, 0, 0], texturePath, label, onCl
                     map={texture}
                     transparent={true}
                     alphaTest={0.1}
-                    uProgress={0.0}
+                    uProgress={isTouch ? 1 : 0}
                     paintUniforms={paintUniforms}
                     paintConfig={{dirX: 1.0, dirY: 0.0, dirZ: -0.1, startDist: -5.0, endDist: 55.0, noiseAxes: 'yz'}}
                 />

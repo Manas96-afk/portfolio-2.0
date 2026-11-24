@@ -667,16 +667,18 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
     const isTouch = isTouchDevice();
     const dummyTex = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-    // Determine painted front texture URL
-    const paintedFrontTextureUrl = isTouch ? dummyTex : (item.paintedFrontTexture || (
+    // Determine painted front texture URL (always the colored version — touch
+    // devices default to the painted state and skip the sketch front)
+    const paintedFrontTextureUrl = (item.paintedFrontTexture || (
         isBlogMonitor ? '/textures/studio/monitor_front_painted.webp' :
             isTvMonitor ? '/textures/studio/tv_front_painted.webp' :
                 isSlimTvMonitor ? '/textures/studio/slimtv_front_painted.webp' :
                     '/textures/studio/phone_front_painted.webp'
     ));
 
-    // Load dynamic front texture
-    const frontTex = useLoader(TextureLoader, frontTextureUrl);
+    // Load dynamic front texture (touch shows the painted version by default,
+    // so the sketch front is never fetched there)
+    const frontTex = useLoader(TextureLoader, isTouch ? dummyTex : frontTextureUrl);
     const frontPaintedTex = useLoader(TextureLoader, paintedFrontTextureUrl);
 
     // Photos have their own aspect ratio, the screen face has another: fit the
@@ -693,44 +695,44 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
     );
 
     // Load Monitor textures (Blog) - shell + painted
-    const monitorBack = useLoader(TextureLoader, '/textures/studio/monitor_back.webp');
-    const monitorTop = useLoader(TextureLoader, '/textures/studio/monitor_top.webp');
-    const monitorBottom = useLoader(TextureLoader, '/textures/studio/monitor_bottom.webp');
-    const monitorLeft = useLoader(TextureLoader, '/textures/studio/monitor_left.webp');
-    const monitorRight = useLoader(TextureLoader, '/textures/studio/monitor_right.webp');
-    const monitorBackPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_back_painted.webp');
-    const monitorTopPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_top_painted.webp');
-    const monitorBottomPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_bottom_painted.webp');
-    const monitorLeftPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_left_painted.webp');
-    const monitorRightPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_right_painted.webp');
+    const monitorBack = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_back.webp');
+    const monitorTop = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_top.webp');
+    const monitorBottom = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_bottom.webp');
+    const monitorLeft = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_left.webp');
+    const monitorRight = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/monitor_right.webp');
+    const monitorBackPainted = useLoader(TextureLoader, '/textures/studio/monitor_back_painted.webp');
+    const monitorTopPainted = useLoader(TextureLoader, '/textures/studio/monitor_top_painted.webp');
+    const monitorBottomPainted = useLoader(TextureLoader, '/textures/studio/monitor_bottom_painted.webp');
+    const monitorLeftPainted = useLoader(TextureLoader, '/textures/studio/monitor_left_painted.webp');
+    const monitorRightPainted = useLoader(TextureLoader, '/textures/studio/monitor_right_painted.webp');
 
     // Load TV textures (YouTube) - shell + painted
-    const tvBack = useLoader(TextureLoader, '/textures/studio/tv_back.webp');
-    const tvTop = useLoader(TextureLoader, '/textures/studio/tv_top.webp');
-    const tvBottom = useLoader(TextureLoader, '/textures/studio/tv_bottom.webp');
-    const tvSide = useLoader(TextureLoader, '/textures/studio/tv_side.webp');
-    const tvBackPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/tv_back_painted.webp');
-    const tvTopPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/tv_top_painted.webp');
-    const tvBottomPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/tv_bottom_painted.webp');
-    const tvSidePainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/tv_side_painted.webp');
+    const tvBack = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/tv_back.webp');
+    const tvTop = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/tv_top.webp');
+    const tvBottom = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/tv_bottom.webp');
+    const tvSide = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/tv_side.webp');
+    const tvBackPainted = useLoader(TextureLoader, '/textures/studio/tv_back_painted.webp');
+    const tvTopPainted = useLoader(TextureLoader, '/textures/studio/tv_top_painted.webp');
+    const tvBottomPainted = useLoader(TextureLoader, '/textures/studio/tv_bottom_painted.webp');
+    const tvSidePainted = useLoader(TextureLoader, '/textures/studio/tv_side_painted.webp');
 
     // Load Phone textures (TikTok) - shell + painted
-    const phoneBack = useLoader(TextureLoader, '/textures/studio/phone_back.webp');
-    const phoneSide = useLoader(TextureLoader, '/textures/studio/phone_side.webp');
-    const phoneBackPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/phone_back_painted.webp');
-    const phoneSidePainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/phone_side_painted.webp');
+    const phoneBack = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/phone_back.webp');
+    const phoneSide = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/phone_side.webp');
+    const phoneBackPainted = useLoader(TextureLoader, '/textures/studio/phone_back_painted.webp');
+    const phoneSidePainted = useLoader(TextureLoader, '/textures/studio/phone_side_painted.webp');
 
     // Load Slim TV textures (custom flat panel) - shell + painted
-    const slimtvBack = useLoader(TextureLoader, '/textures/studio/slimtv_back.webp');
-    const slimtvTop = useLoader(TextureLoader, '/textures/studio/slimtv_top.webp');
-    const slimtvBottom = useLoader(TextureLoader, '/textures/studio/slimtv_bottom.webp');
-    const slimtvLeft = useLoader(TextureLoader, '/textures/studio/slimtv_left.webp');
-    const slimtvRight = useLoader(TextureLoader, '/textures/studio/slimtv_right.webp');
-    const slimtvBackPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_back_painted.webp');
-    const slimtvTopPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_top_painted.webp');
-    const slimtvBottomPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_bottom_painted.webp');
-    const slimtvLeftPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_left_painted.webp');
-    const slimtvRightPainted = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_right_painted.webp');
+    const slimtvBack = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_back.webp');
+    const slimtvTop = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_top.webp');
+    const slimtvBottom = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_bottom.webp');
+    const slimtvLeft = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_left.webp');
+    const slimtvRight = useLoader(TextureLoader, isTouch ? dummyTex : '/textures/studio/slimtv_right.webp');
+    const slimtvBackPainted = useLoader(TextureLoader, '/textures/studio/slimtv_back_painted.webp');
+    const slimtvTopPainted = useLoader(TextureLoader, '/textures/studio/slimtv_top_painted.webp');
+    const slimtvBottomPainted = useLoader(TextureLoader, '/textures/studio/slimtv_bottom_painted.webp');
+    const slimtvLeftPainted = useLoader(TextureLoader, '/textures/studio/slimtv_left_painted.webp');
+    const slimtvRightPainted = useLoader(TextureLoader, '/textures/studio/slimtv_right_painted.webp');
 
     // Build texture config for current device type
     // Each entry: { sketch, painted } — if painted is null, that face won't have reveal
@@ -828,9 +830,11 @@ const MonitorBlock = memo(({ item, meshRef, isSelected, onMonitorClick, disabled
     const updatePaintState = useCallback(() => {
         if (!faceConfig) return;
 
-        const shouldPaint = !isTouch && (isHoveredRef.current || isSelected);
+        // Touch devices stay painted permanently (hover never fires there)
+        const shouldPaint = isTouch || isHoveredRef.current || isSelected;
         const targetProgress = shouldPaint ? 1.0 : 0.0;
-        const duration = shouldPaint ? 0.8 : 0.5;
+        // Touch shows the painted state instantly (no hover transition there)
+        const duration = shouldPaint ? (isTouch ? 0 : 0.8) : 0.5;
 
         // Animate each revealMaterial face
         matRefs.forEach((ref) => {
