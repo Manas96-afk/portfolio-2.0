@@ -1,0 +1,14 @@
+touch: default to painted (colored) state on all hover-painted elements
+
+- texturePreloadList: flip filter logic — painted always preloaded; paired standard textures dropped on touch (swap, not add); add _sketch<->_painted pairing rule + entrance painted paths
+- useData: preload painted variants unconditionally; gate fronts to hover devices
+- CorridorDecorations: frames show painted by default on touch (shouldBePainted |= isTouch); compile-hide gate; frameTexture->dummy on touch
+- DoorSection: sketch hooks dummy on touch; painted always real; hide-delay early-return on touch (both pointerLeave + closeDoor)
+- EntranceDoors: sketch hooks dummy on mobile; painted always real; defaultReveal=1 on mobile; painted meshes visible on mobile
+- StudioRoom: 17 painted hooks always real; shell sketch hooks dummy on touch; shouldPaint |= isTouch; instant reveal duration on touch
+- GalleryRoom: painted URLs always loaded; back/overlay always painted; canHover gate removed from tech logos & paintedTexture; paintProgress default 1 on mobile; per-frame guard pins 1
+- InfiniteSkyManager: AwardButton + 3 cards + balloons all flip to painted-by-default (sketch->dummy, painted always, uProgress init 1, reset paths gate on touch)
+- SocialBarrel: painted texture path always; paintedRef visible on touch; uProgress init 1; hover handlers early-return on touch
+- NavigationUI: map painted clip-path layers stay open on touch (no hover)
+- No desktop behavior changed; memory neutral (swap, not add)
+- lint clean (0 new problems); build passes
