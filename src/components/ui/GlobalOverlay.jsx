@@ -223,6 +223,10 @@ const ContentCard = ({ content, isOpen, onClose, isMobile }) => {
         width: 'clamp(280px, 30vw, 450px)', // <--- FLUID
         right: 'clamp(2rem, 12vw, 20rem)', // <--- FLUID: scales with viewport
         top: '50%',
+        // Short viewports (landscape phones): clamp + scroll instead of
+        // overflowing past the top/bottom of the screen
+        maxHeight: '85vh',
+        overflowY: 'auto',
         transform: isOpen ? 'translateY(-50%) rotate(1deg)' : 'translate(150%, -50%) rotate(15deg)',
         opacity: isOpen ? 1 : 0,
         color: '#1a1a1a',
@@ -259,7 +263,7 @@ const ContentCard = ({ content, isOpen, onClose, isMobile }) => {
                 top: 0,
                 left: 0,
                 width: '100vw',
-                height: '100vh',
+                // height comes from GlobalOverlay.scss (100dvh + 100vh fallback)
                 zIndex: 2000,
                 pointerEvents: isOpen ? 'auto' : 'none',
                 // Important: Wrapper itself has NO background and NO mask. 

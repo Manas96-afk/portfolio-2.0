@@ -1,5 +1,12 @@
 // GlobalOverlay Styles - Torn Paper Aesthetic
 
+// Fill the visible viewport — 100dvh tracks mobile browser toolbars,
+// 100vh stays as the fallback where dvh is unsupported
+.global-overlay-wrapper {
+    height: 100vh;
+    height: 100dvh;
+}
+
 @font-face {
     font-family: 'Cabin Sketch';
     src: url('/fonts/CabinSketch-Bold.ttf') format('truetype');
@@ -31,6 +38,13 @@
 .studio-paper-card {
     position: relative;
     background: #ffffff;
+    // Scrolling card on short screens — keep the torn look, no visible bar
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE/Edge
+
+    &::-webkit-scrollbar {
+        display: none; // Chrome/Safari
+    }
 
     // Paper texture background
     &::before {

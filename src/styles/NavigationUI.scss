@@ -181,6 +181,12 @@
     transform: translateX(-50%) translateY(-100%);
     width: 90%;
     max-width: 500px;
+    // Short viewports (landscape phones): cap width by available height so the
+    // map + header fit without cutting off the bottom rooms.
+    // map.webp is ~1.05:1 and header+padding is ~110px — adjust together.
+    @media (max-height: 560px) {
+        max-width: calc((100vh - 110px) * 1.047);
+    }
     border: none;
     border-radius: 0;
     filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.15));

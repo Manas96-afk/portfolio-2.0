@@ -178,8 +178,10 @@ function AppContent() {
                 antialias: settings.antialias,
                 alpha: false,
                 powerPreference: settings.powerPreference,
-                localClippingEnabled: true,
-                failIfMajorPerformanceCaveat: true
+                localClippingEnabled: true
+                // failIfMajorPerformanceCaveat omitted: software-rendered
+                // devices must still run (slower) instead of a blank screen —
+                // tiers + PerformanceMonitor already guard FPS
               }}
               dpr={settings.dpr}
               shadows={settings.shadows}
