@@ -916,9 +916,11 @@ const ProjectCard = memo(forwardRef(({ index, total, project, clothespinTexture,
                     }
 
                     timeline.to(paperRef.current.scale, {
-                        x: 1.1,
-                        y: 1.1,
-                        z: 1.1,
+                        // Zoom so the project details are readable on open
+                        // (portrait phones keep a smaller zoom — they fit by width)
+                        x: isMobile ? 1.2 : 1.35,
+                        y: isMobile ? 1.2 : 1.35,
+                        z: isMobile ? 1.2 : 1.35,
                         duration: 0.3,
                         ease: 'sine.out'
                     }, '-=0.4');
@@ -1243,13 +1245,13 @@ const ProjectCard = memo(forwardRef(({ index, total, project, clothespinTexture,
                     <Text
                         ref={detailsTextRef2}
                         position={[0, 0.2, 0.01]} // Poniżej nagłówka
-                        fontSize={0.06}
+                        fontSize={0.075}
                         color="#333333"
                         font="/fonts/CabinSketch-Bold.ttf"
                         anchorX="center"
                         anchorY="top"
-                        maxWidth={1.1} // Maksymalna szerokość zanim zacznie łamać linie
-                        lineHeight={1.4}
+                        maxWidth={1.15} // Maksymalna szerokość zanim zacznie łamać linie
+                        lineHeight={1.3}
                         textAlign="center"
                         fillOpacity={0} // Start hidden
                     >
